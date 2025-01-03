@@ -33,20 +33,23 @@ const StepAccountDetails = ({ handleNext, activeStep }: StepAccountDetailsProps)
   return (
     <>
       <div className='mbe-5'>
-        <Typography variant='h4'>Account Information</Typography>
-        <Typography>Enter Your Account Details</Typography>
+        <Typography variant='h4'>Información de la cuenta</Typography>
+        <Typography>Datos de autenticación y acceso </Typography>
       </div>
       <Grid container spacing={5}>
         <Grid item xs={12} sm={6}>
-          <TextField fullWidth label='Username' placeholder='johnDoe' />
+          <TextField fullWidth label='Nombre' placeholder='Juan' />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <TextField fullWidth type='email' label='Email' placeholder='johndoe@gmail.com' />
+          <TextField fullWidth label='Apellido' placeholder='Lopez' />
+        </Grid>
+        <Grid item xs={12} sm={12}>
+          <TextField fullWidth type='email' label='Correo electrónico' placeholder='tu-correo@proveedor.com' />
         </Grid>
         <Grid item xs={12} sm={6}>
           <TextField
             fullWidth
-            label='Password'
+            label='Contraseña'
             placeholder='············'
             id='outlined-adornment-password'
             type={isPasswordShown ? 'text' : 'password'}
@@ -70,7 +73,7 @@ const StepAccountDetails = ({ handleNext, activeStep }: StepAccountDetailsProps)
         <Grid item xs={12} sm={6}>
           <TextField
             fullWidth
-            label='Confirm Password'
+            label='Confirmar Contraseña'
             placeholder='············'
             id='outlined-confirm-password'
             type={isConfirmPasswordShown ? 'text' : 'password'}
@@ -91,9 +94,6 @@ const StepAccountDetails = ({ handleNext, activeStep }: StepAccountDetailsProps)
             }}
           />
         </Grid>
-        <Grid item xs={12}>
-          <TextField fullWidth label='Profile Link' placeholder='johndoe/profile' />
-        </Grid>
         <Grid item xs={12} className='flex justify-between'>
           <Button
             disabled={activeStep === 0}
@@ -101,14 +101,14 @@ const StepAccountDetails = ({ handleNext, activeStep }: StepAccountDetailsProps)
             variant='outlined'
             startIcon={<DirectionalIcon ltrIconClass='ri-arrow-left-line' rtlIconClass='ri-arrow-right-line' />}
           >
-            Previous
+            Anterior
           </Button>
           <Button
             variant='contained'
             onClick={handleNext}
             endIcon={<DirectionalIcon ltrIconClass='ri-arrow-right-line' rtlIconClass='ri-arrow-left-line' />}
           >
-            Next
+            Siguiente
           </Button>
         </Grid>
       </Grid>

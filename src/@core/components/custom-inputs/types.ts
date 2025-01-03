@@ -57,6 +57,7 @@ export type CustomInputVerticalProps = {
   color?: ThemeColor
   gridProps?: GridProps
   data: CustomInputVerticalData
+  disabled?: boolean
 } & (
   | {
       type: 'checkbox'

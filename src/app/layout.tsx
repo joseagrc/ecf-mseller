@@ -11,9 +11,9 @@ import '@/app/globals.css'
 import '@assets/iconify-icons/generated-icons.css'
 
 export const metadata = {
-  title: 'Materio - Material Design Next.js Admin Template',
+  title: 'eCF MSeller - DGII - Registro de Contribuyentes',
   description:
-    'Materio - Material Design Next.js Admin Dashboard Template - is the most developer friendly & highly customizable Admin Dashboard Template based on MUI v5.'
+    'eCF MSeller - DGII - Registro de Contribuyentes ayudando a los contribuyentes a cumplir con la facturación Electrónica.'
 }
 
 const RootLayout = ({ children }: ChildrenType) => {
@@ -21,7 +21,7 @@ const RootLayout = ({ children }: ChildrenType) => {
   const direction = 'ltr'
 
   return (
-    <html id='__next' lang='en' dir={direction}>
+    <html id='__next' lang='es' dir={direction}>
       <body className='flex is-full min-bs-full flex-auto flex-col'>{children}</body>
     </html>
   )

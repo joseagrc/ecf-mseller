@@ -32,12 +32,12 @@ const Content = styled(Typography, {
 // Vars
 const customInputData: CustomInputVerticalData[] = [
   {
-    title: 'Basic',
-    value: 'basic',
+    title: 'Gratis',
+    value: 'free',
     content: (
       <Content component='div' className='flex justify-center items-center flex-col bs-full gap-2'>
         <Typography variant='body2' className='mlb-auto'>
-          A simple start for start ups & Students
+          Ideal para iniciar la certificación y pequeños negocios
         </Typography>
         <div>
           <Typography color='primary' variant='body2' component='sup' className='self-start'>
@@ -47,7 +47,7 @@ const customInputData: CustomInputVerticalData[] = [
             0
           </Typography>
           <Typography color='text.disabled' variant='body2' component='sub' className='self-end'>
-            /month
+            /mes
           </Typography>
         </div>
       </Content>
@@ -55,12 +55,12 @@ const customInputData: CustomInputVerticalData[] = [
     isSelected: true
   },
   {
-    title: 'Standard',
+    title: 'Estándar',
     value: 'standard',
     content: (
       <Content component='div' className='flex justify-center items-center flex-col bs-full'>
         <Typography variant='body2' className='mlb-auto'>
-          For small to medium businesses
+          Esencial para pequeños y medianos negocios
         </Typography>
         <div>
           <Typography color='primary' variant='body2' component='sup' className='self-start'>
@@ -70,19 +70,19 @@ const customInputData: CustomInputVerticalData[] = [
             99
           </Typography>
           <Typography variant='body2' component='sub' className='self-end' color='text.disabled'>
-            /month
+            /mes
           </Typography>
         </div>
       </Content>
     )
   },
   {
-    title: 'Enterprise',
+    title: 'Empresarial',
     value: 'enterprise',
     content: (
       <Content component='div' className='flex justify-center items-center flex-col bs-full'>
         <Typography variant='body2' className='mlb-auto'>
-          Solution for enterprise & organizations
+          Solution for enterprise & organizations Solución para empresas que generan alto volumen de facturación
         </Typography>
         <div>
           <Typography color='primary' variant='body2' component='sup' className='self-start'>
@@ -92,7 +92,7 @@ const customInputData: CustomInputVerticalData[] = [
             499
           </Typography>
           <Typography variant='body2' component='sub' className='self-end' color='text.disabled'>
-            /month
+            /mes
           </Typography>
         </div>
       </Content>
@@ -101,13 +101,8 @@ const customInputData: CustomInputVerticalData[] = [
 ]
 
 const StepBillingDetails = ({ handlePrev, activeStep }: StepBillingDetailsProps) => {
-  // Vars
-  const initialSelectedOption: string = customInputData.filter(item => item.isSelected)[
-    customInputData.filter(item => item.isSelected).length - 1
-  ].value
-
   // States
-  const [selectedOption, setSelectedOption] = useState<string>(initialSelectedOption)
+  const [selectedOption, setSelectedOption] = useState<string>('free')
 
   const handleOptionChange = (prop: string | ChangeEvent<HTMLInputElement>) => {
     if (typeof prop === 'string') {
@@ -120,8 +115,8 @@ const StepBillingDetails = ({ handlePrev, activeStep }: StepBillingDetailsProps)
   return (
     <>
       <div className='mbe-5'>
-        <Typography variant='h4'>Select Plan</Typography>
-        <Typography>Select plan as per your requirement</Typography>
+        <Typography variant='h4'>Seleccionar Plan</Typography>
+        <Typography>Seleccionar el plan acomodado</Typography>
       </div>
       <Grid container spacing={5}>
         {customInputData.map((item, index) => (
@@ -129,6 +124,7 @@ const StepBillingDetails = ({ handlePrev, activeStep }: StepBillingDetailsProps)
             type='radio'
             key={index}
             data={item}
+            disabled
             gridProps={{ xs: 12, sm: 4 }}
             selected={selectedOption}
             name='custom-radios-basic'
@@ -137,21 +133,21 @@ const StepBillingDetails = ({ handlePrev, activeStep }: StepBillingDetailsProps)
         ))}
       </Grid>
       <div className='mbs-12 mbe-5'>
-        <Typography variant='h4'>Payment Information</Typography>
-        <Typography>Enter your card information</Typography>
+        <Typography variant='h4'>Información de pago</Typography>
+        <Typography>Pago automático, aún no disponible</Typography>
       </div>
       <Grid container spacing={5}>
         <Grid item xs={12}>
-          <TextField fullWidth label='Card Number' placeholder='1234 1234 1234 1234' />
+          <TextField disabled fullWidth label='Card Number' placeholder='1234 1234 1234 1234' />
         </Grid>
         <Grid item xs={12} sm={4}>
-          <TextField fullWidth label='Name on Card' placeholder='John Doe' />
+          <TextField disabled fullWidth label='Name on Card' placeholder='John Doe' />
         </Grid>
         <Grid item xs={12} sm={4}>
-          <TextField fullWidth label='Expiry Date' placeholder='MM/YY' />
+          <TextField disabled fullWidth label='Expiry Date' placeholder='MM/YY' />
         </Grid>
         <Grid item xs={12} sm={4}>
-          <TextField fullWidth label='CVV' placeholder='123' />
+          <TextField disabled fullWidth label='CVV' placeholder='123' />
         </Grid>
         <Grid item xs={12} className='flex justify-between'>
           <Button
@@ -161,7 +157,7 @@ const StepBillingDetails = ({ handlePrev, activeStep }: StepBillingDetailsProps)
             onClick={handlePrev}
             startIcon={<DirectionalIcon ltrIconClass='ri-arrow-left-line' rtlIconClass='ri-arrow-right-line' />}
           >
-            Previous
+            Anterior
           </Button>
           <Button
             variant='contained'
@@ -169,7 +165,7 @@ const StepBillingDetails = ({ handlePrev, activeStep }: StepBillingDetailsProps)
             onClick={() => alert('Submitted..!!')}
             endIcon={<i className='ri-check-line' />}
           >
-            Submit
+            Crear Cuenta
           </Button>
         </Grid>
       </Grid>

@@ -16,6 +16,9 @@
  * Another way is to clear the cookie from the browser's Application/Storage tab and then reload the page.
  */
 
+// Third-party Imports
+import type { ToastPosition } from 'react-toastify'
+
 // Type Imports
 import type { Mode, Skin, Layout, LayoutComponentPosition, LayoutComponentWidth } from '@core/types'
 
@@ -47,13 +50,14 @@ export type Config = {
   compactContentWidth: number
   footer: Footer
   disableRipple: boolean
+  toastPosition: ToastPosition
 }
 
 const themeConfig: Config = {
-  templateName: 'Materio',
-  homePageUrl: '/home',
-  settingsCookieName: 'materio-mui-next-demo',
-  mode: 'system', // 'system', 'light', 'dark'
+  templateName: 'eCF-MSeller',
+  homePageUrl: '/',
+  settingsCookieName: 'ecf-mseller',
+  mode: 'light', // 'system', 'light', 'dark'
   skin: 'default', // 'default', 'bordered'
   semiDark: false, // true, false
   layout: 'vertical', // 'vertical', 'collapsed', 'horizontal'
@@ -72,7 +76,8 @@ const themeConfig: Config = {
     contentWidth: 'compact', // 'compact', 'wide'
     detached: true //! true, false (This will not work in the Horizontal Layout)
   },
-  disableRipple: false // true, false
+  disableRipple: false, // true, false
+  toastPosition: 'top-right' // 'top-right', 'top-center', 'top-left', 'bottom-right', 'bottom-center', 'bottom-left'
 }
 
 export default themeConfig

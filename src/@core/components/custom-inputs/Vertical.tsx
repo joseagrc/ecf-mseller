@@ -80,7 +80,7 @@ const CheckboxInput = styled(Checkbox, {
 
 const CustomInputVertical = (props: CustomInputVerticalProps) => {
   // Props
-  const { type, data, name, selected, gridProps, handleChange, color = 'primary' } = props
+  const { type, data, name, selected, gridProps, handleChange, color = 'primary', disabled } = props
 
   // Vars
   const { title, value, content, asset } = data
@@ -89,7 +89,7 @@ const CustomInputVertical = (props: CustomInputVerticalProps) => {
     return (
       <Grid item {...gridProps}>
         <Root
-          onClick={() => handleChange(value)}
+          onClick={() => !disabled && handleChange(value)}
           className={classnames({
             'radio-only': type === 'radio' && !asset && !title && !content,
             'checkbox-only': type === 'checkbox' && !asset && !title && !content,
@@ -100,13 +100,21 @@ const CustomInputVertical = (props: CustomInputVerticalProps) => {
           {title ? typeof title === 'string' ? <Title>{title}</Title> : title : null}
           {content ? typeof content === 'string' ? <Content>{content}</Content> : content : null}
           {type === 'radio' ? (
-            <RadioInput name={name} color={color} value={value} onChange={handleChange} checked={selected === value} />
+            <RadioInput
+              name={name}
+              color={color}
+              value={value}
+              onChange={handleChange}
+              checked={selected === value}
+              disabled={disabled}
+            />
           ) : (
             <CheckboxInput
               color={color}
               name={`${name}-${value}`}
               checked={selected.includes(value)}
               onChange={() => handleChange(value)}
+              disabled={disabled}
             />
           )}
         </Root>

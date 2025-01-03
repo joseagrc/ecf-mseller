@@ -18,28 +18,31 @@ type StepPersonalInfoProps = {
   activeStep: number
 }
 
-const StepPersonalInfo = ({ handleNext, handlePrev, activeStep }: StepPersonalInfoProps) => {
+const BusinessInfo = ({ handleNext, handlePrev, activeStep }: StepPersonalInfoProps) => {
   return (
     <>
       <div className='mbe-5'>
-        <Typography variant='h4'>Personal Information</Typography>
-        <Typography>Enter Your Personal Information</Typography>
+        <Typography variant='h4'>Información del negocio</Typography>
+        <Typography>Entidad autorizada por la DGII</Typography>
       </div>
       <Grid container spacing={5}>
-        <Grid item xs={12} sm={6}>
-          <TextField fullWidth label='First Name' placeholder='John' />
+        <Grid item xs={12} sm={12}>
+          <TextField fullWidth label='Nombre Negocio' placeholder='' />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <TextField fullWidth label='Last Name' placeholder='Doe' />
+          <TextField fullWidth type='number' label='RNC' placeholder='' />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField fullWidth type='number' label='Confirmar RNC' placeholder='' />
         </Grid>
         <Grid item xs={12} sm={6}>
           <TextField
             fullWidth
             type='number'
-            label='Mobile'
-            placeholder='123-456-7890'
+            label='Teléfono'
+            placeholder='809-000-0000'
             InputProps={{
-              startAdornment: <InputAdornment position='start'>US (+1)</InputAdornment>
+              startAdornment: <InputAdornment position='start'>DO (+1)</InputAdornment>
             }}
           />
         </Grid>
@@ -47,23 +50,16 @@ const StepPersonalInfo = ({ handleNext, handlePrev, activeStep }: StepPersonalIn
           <TextField fullWidth type='number' label='Pin Code' placeholder='689421' />
         </Grid>
         <Grid item xs={12}>
-          <TextField fullWidth label='Address' placeholder='1456, Liberty Street' />
-        </Grid>
-        <Grid item xs={12}>
-          <TextField fullWidth label='Landmark' placeholder='Nr. Wall Street' />
+          <TextField fullWidth label='Dirección' placeholder='' />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <TextField fullWidth label='City' placeholder='Miami' />
+          <TextField fullWidth label='Ciudad' placeholder='' />
         </Grid>
         <Grid item xs={12} md={6}>
           <FormControl fullWidth>
-            <InputLabel>State</InputLabel>
-            <Select label='State' defaultValue='new-york'>
-              <MenuItem value='new-york'>New York</MenuItem>
-              <MenuItem value='california'>California</MenuItem>
-              <MenuItem value='texas'>Texas</MenuItem>
-              <MenuItem value='florida'>Florida</MenuItem>
-              <MenuItem value='washington'>Washington</MenuItem>
+            <InputLabel>País</InputLabel>
+            <Select label='State' defaultValue='republica dominicana' disabled>
+              <MenuItem value='republica dominicana'>República Dominicana</MenuItem>
             </Select>
           </FormControl>
         </Grid>
@@ -75,14 +71,14 @@ const StepPersonalInfo = ({ handleNext, handlePrev, activeStep }: StepPersonalIn
             onClick={handlePrev}
             startIcon={<DirectionalIcon ltrIconClass='ri-arrow-left-line' rtlIconClass='ri-arrow-right-line' />}
           >
-            Previous
+            Anterior
           </Button>
           <Button
             variant='contained'
             onClick={handleNext}
             endIcon={<DirectionalIcon ltrIconClass='ri-arrow-right-line' rtlIconClass='ri-arrow-left-line' />}
           >
-            Next
+            Siguiente
           </Button>
         </Grid>
       </Grid>
@@ -90,4 +86,4 @@ const StepPersonalInfo = ({ handleNext, handlePrev, activeStep }: StepPersonalIn
   )
 }
 
-export default StepPersonalInfo
+export default BusinessInfo

@@ -19,7 +19,7 @@ import classnames from 'classnames'
 // Component Imports
 import StepperWrapper from '@core/styles/stepper'
 import StepAccountDetails from './StepAccountDetails'
-import StepPersonalInfo from './StepPersonalInfo'
+import BusinessInfo from './BusinessInfo'
 import StepBillingDetails from './StepBillingDetails'
 import StepperCustomDot from '@components/stepper-dot'
 import Logo from '@components/layout/shared/Logo'
@@ -30,16 +30,16 @@ import { useSettings } from '@core/hooks/useSettings'
 // Vars
 const steps = [
   {
-    title: 'Account',
-    subtitle: 'Account Details'
+    title: 'Cuenta',
+    subtitle: 'Datos de la Cuenta'
   },
   {
-    title: 'Personal',
-    subtitle: 'Enter Information'
+    title: 'Negocio',
+    subtitle: 'Datos del Negocio'
   },
   {
-    title: 'Billing',
-    subtitle: 'Payment Details'
+    title: 'Facturación',
+    subtitle: 'Detalles de Facturación'
   }
 ]
 
@@ -48,7 +48,7 @@ const getStepContent = (step: number, handleNext: () => void, handlePrev: () => 
     case 0:
       return <StepAccountDetails activeStep={step} handleNext={handleNext} />
     case 1:
-      return <StepPersonalInfo activeStep={step} handleNext={handleNext} handlePrev={handlePrev} />
+      return <BusinessInfo activeStep={step} handleNext={handleNext} handlePrev={handlePrev} />
     case 2:
       return <StepBillingDetails activeStep={step} handlePrev={handlePrev} />
 
