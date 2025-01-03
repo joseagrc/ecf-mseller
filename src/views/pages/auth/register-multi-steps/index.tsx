@@ -84,9 +84,9 @@ const RegisterMultiSteps = () => {
         })}
       >
         <img
-          src='/images/illustrations/characters/4.png'
+          src='/images/illustrations/objects/e-cf-registration-image.png'
           alt='multi-steps-character'
-          className={classnames('mis-[92px] bs-auto max-bs-[628px] max-is-full', {
+          className={classnames('mis-[12px] bs-auto max-bs-[428px] max-is-full', {
             'scale-x-[-1]': theme.direction === 'rtl'
           })}
         />
