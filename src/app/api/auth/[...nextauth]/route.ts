@@ -15,7 +15,18 @@ const handler = NextAuth({
       }
     })
   ],
+  pages: {
+    verifyRequest: '/auth/verify',
+    error: '/auth/error'
+  },
   callbacks: {
+    async signIn({ user, account }) {
+      if (account?.error === 'PasswordResetRequiredException') {
+        return `/auth/verify?email=${encodeURIComponent(user.email ?? '')}`
+      }
+
+      return true
+    },
     async jwt({ token, account, profile }: { token: any; account: any; profile?: any }) {
       console.log('JWT Callback - Account:', account)
       console.log('JWT Callback - profile:', profile)
@@ -29,7 +40,8 @@ const handler = NextAuth({
           email: profile.email,
           rnc: profile['custom:rnc'],
           businessName: profile['custom:businessName'],
-          plan: profile['custom:plan']
+          plan: profile['custom:plan'],
+          verified: account.userStatus === 'CONFIRMED'
         }
       }
 

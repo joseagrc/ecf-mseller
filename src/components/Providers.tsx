@@ -2,13 +2,14 @@
 import type { ChildrenType, Direction } from '@core/types'
 
 // Context Imports
-import { VerticalNavProvider } from '@menu/contexts/verticalNavContext'
-import { SettingsProvider } from '@core/contexts/settingsContext'
+import AppReactToastify from '@/libs/styles/AppReactToastify'
 import ThemeProvider from '@components/theme'
+import { SettingsProvider } from '@core/contexts/settingsContext'
+import { VerticalNavProvider } from '@menu/contexts/verticalNavContext'
 
 // Util Imports
-import { getMode, getSettingsFromCookie, getSystemMode } from '@core/utils/serverHelpers'
 import { NextAuthProvider } from '@/contexts/nextAuthProvider'
+import { getMode, getSettingsFromCookie, getSystemMode } from '@core/utils/serverHelpers'
 
 type Props = ChildrenType & {
   direction: Direction
@@ -28,6 +29,7 @@ const Providers = (props: Props) => {
       <VerticalNavProvider>
         <SettingsProvider settingsCookie={settingsCookie} mode={mode}>
           <ThemeProvider direction={direction} systemMode={systemMode}>
+            <AppReactToastify direction={direction} hideProgressBar />
             {children}
           </ThemeProvider>
         </SettingsProvider>
