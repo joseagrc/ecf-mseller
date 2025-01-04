@@ -1,7 +1,7 @@
 // React Imports
 import { useState } from 'react'
 
-import { Controller, useFormContext } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 
 // MUI Imports
 import Grid from '@mui/material/Grid'
@@ -17,22 +17,14 @@ import DirectionalIcon from '@components/DirectionalIcon'
 type StepAccountDetailsProps = {
   handleNext: () => void
   activeStep: number
-  onSubmit: (data: any) => void
 }
 
-const StepAccountDetails = ({ activeStep, onSubmit }: StepAccountDetailsProps) => {
+const StepAccountDetails = ({ handleNext, activeStep }: StepAccountDetailsProps) => {
   // States
   const [isPasswordShown, setIsPasswordShown] = useState<boolean>(false)
   const [isConfirmPasswordShown, setIsConfirmPasswordShown] = useState<boolean>(false)
 
-  const {
-    control,
-    handleSubmit,
-    watch,
-    formState: { errors }
-  } = useFormContext()
-
-  const password = watch('password')
+  const { control, handleSubmit } = useForm()
 
   const handleClickShowPassword = () => {
     setIsPasswordShown(!isPasswordShown)
@@ -40,6 +32,11 @@ const StepAccountDetails = ({ activeStep, onSubmit }: StepAccountDetailsProps) =
 
   const handleClickShowConfirmPassword = () => {
     setIsConfirmPasswordShown(!isConfirmPasswordShown)
+  }
+
+  const onSubmit = (data: any) => {
+    console.log(data)
+    handleNext()
   }
 
   return (
@@ -70,10 +67,6 @@ const StepAccountDetails = ({ activeStep, onSubmit }: StepAccountDetailsProps) =
             name='email'
             control={control}
             defaultValue=''
-            rules={{
-              required: 'Correo electrónico es requerido',
-              pattern: { value: /^\S+@\S+$/i, message: 'Correo electrónico no válido' }
-            }}
             render={({ field }) => (
               <TextField
                 {...field}
@@ -81,8 +74,6 @@ const StepAccountDetails = ({ activeStep, onSubmit }: StepAccountDetailsProps) =
                 type='email'
                 label='Correo electrónico'
                 placeholder='tu-correo@proveedor.com'
-                error={!!errors.email}
-                helperText={errors.email ? String(errors.email.message) : ''}
               />
             )}
           />
@@ -92,10 +83,6 @@ const StepAccountDetails = ({ activeStep, onSubmit }: StepAccountDetailsProps) =
             name='password'
             control={control}
             defaultValue=''
-            rules={{
-              required: 'Contraseña es requerida',
-              minLength: { value: 6, message: 'La contraseña debe tener al menos 6 caracteres' }
-            }}
             render={({ field }) => (
               <TextField
                 {...field}
@@ -104,8 +91,6 @@ const StepAccountDetails = ({ activeStep, onSubmit }: StepAccountDetailsProps) =
                 placeholder='············'
                 id='outlined-adornment-password'
                 type={isPasswordShown ? 'text' : 'password'}
-                error={!!errors.password}
-                helperText={errors.password ? String(errors.password.message) : ''}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position='end'>
@@ -130,10 +115,6 @@ const StepAccountDetails = ({ activeStep, onSubmit }: StepAccountDetailsProps) =
             name='confirmPassword'
             control={control}
             defaultValue=''
-            rules={{
-              required: 'Confirmar contraseña es requerido',
-              validate: value => value === password || 'Las contraseñas no coinciden'
-            }}
             render={({ field }) => (
               <TextField
                 {...field}
@@ -142,8 +123,6 @@ const StepAccountDetails = ({ activeStep, onSubmit }: StepAccountDetailsProps) =
                 placeholder='············'
                 id='outlined-confirm-password'
                 type={isConfirmPasswordShown ? 'text' : 'password'}
-                error={!!errors.confirmPassword}
-                helperText={errors.confirmPassword ? String(errors.confirmPassword.message) : ''}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position='end'>

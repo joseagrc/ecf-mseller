@@ -1,5 +1,5 @@
 // React Imports
-import { Controller, useFormContext } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 
 // MUI Imports
 import Grid from '@mui/material/Grid'
@@ -19,13 +19,15 @@ type StepPersonalInfoProps = {
   handleNext: () => void
   handlePrev: () => void
   activeStep: number
-  onSubmit: (data: any) => void
 }
 
-const BusinessInfo = ({ handlePrev, activeStep, onSubmit }: StepPersonalInfoProps) => {
-  const { control, handleSubmit, watch, formState: { errors } } = useFormContext()
+const BusinessInfo = ({ handleNext, handlePrev, activeStep }: StepPersonalInfoProps) => {
+  const { control, handleSubmit } = useForm()
 
-  const rnc = watch('rnc')
+  const onSubmit = (data: any) => {
+    console.log(data)
+    handleNext()
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -39,17 +41,7 @@ const BusinessInfo = ({ handlePrev, activeStep, onSubmit }: StepPersonalInfoProp
             name='businessName'
             control={control}
             defaultValue=''
-            rules={{ required: 'Nombre del negocio es requerido' }}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                label='Nombre Negocio'
-                placeholder=''
-                error={!!errors.businessName}
-                helperText={errors.businessName ? String(errors.businessName.message) : ''}
-              />
-            )}
+            render={({ field }) => <TextField {...field} fullWidth label='Nombre Negocio' placeholder='' />}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -57,18 +49,7 @@ const BusinessInfo = ({ handlePrev, activeStep, onSubmit }: StepPersonalInfoProp
             name='rnc'
             control={control}
             defaultValue=''
-            rules={{ required: 'RNC es requerido' }}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                type='number'
-                label='RNC'
-                placeholder=''
-                error={!!errors.rnc}
-                helperText={errors.rnc ? String(errors.rnc.message) : ''}
-              />
-            )}
+            render={({ field }) => <TextField {...field} fullWidth type='number' label='RNC' placeholder='' />}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -76,18 +57,7 @@ const BusinessInfo = ({ handlePrev, activeStep, onSubmit }: StepPersonalInfoProp
             name='confirmRnc'
             control={control}
             defaultValue=''
-            rules={{ required: 'Confirmar RNC es requerido', validate: value => value === rnc || 'Los RNCs no coinciden' }}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                type='number'
-                label='Confirmar RNC'
-                placeholder=''
-                error={!!errors.confirmRnc}
-                helperText={errors.confirmRnc ? String(errors.confirmRnc.message) : ''}
-              />
-            )}
+            render={({ field }) => <TextField {...field} fullWidth type='number' label='Confirmar RNC' placeholder='' />}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -95,7 +65,6 @@ const BusinessInfo = ({ handlePrev, activeStep, onSubmit }: StepPersonalInfoProp
             name='phone'
             control={control}
             defaultValue=''
-            rules={{ required: 'Teléfono es requerido' }}
             render={({ field }) => (
               <TextField
                 {...field}
@@ -103,8 +72,6 @@ const BusinessInfo = ({ handlePrev, activeStep, onSubmit }: StepPersonalInfoProp
                 type='number'
                 label='Teléfono'
                 placeholder='809-000-0000'
-                error={!!errors.phone}
-                helperText={errors.phone ? String(errors.phone.message) : ''}
                 InputProps={{
                   startAdornment: <InputAdornment position='start'>DO (+1)</InputAdornment>
                 }}
@@ -117,18 +84,7 @@ const BusinessInfo = ({ handlePrev, activeStep, onSubmit }: StepPersonalInfoProp
             name='pinCode'
             control={control}
             defaultValue=''
-            rules={{ required: 'Código PIN es requerido' }}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                type='number'
-                label='Código PIN'
-                placeholder='689421'
-                error={!!errors.pinCode}
-                helperText={errors.pinCode ? String(errors.pinCode.message) : ''}
-              />
-            )}
+            render={({ field }) => <TextField {...field} fullWidth type='number' label='Pin Code' placeholder='689421' />}
           />
         </Grid>
         <Grid item xs={12}>
@@ -136,18 +92,7 @@ const BusinessInfo = ({ handlePrev, activeStep, onSubmit }: StepPersonalInfoProp
             name='address'
             control={control}
             defaultValue=''
-            rules={{ required: 'Dirección es requerida' }}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                label='Dirección'
-                placeholder=''
-                error={!!errors.address}
-                helperText={errors.address ? String(errors.address.message) : ''}
-              />
-
-            )}
+            render={({ field }) => <TextField {...field} fullWidth label='Dirección' placeholder='' />}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -155,34 +100,22 @@ const BusinessInfo = ({ handlePrev, activeStep, onSubmit }: StepPersonalInfoProp
             name='city'
             control={control}
             defaultValue=''
-            rules={{ required: 'Ciudad es requerida' }}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                label='Ciudad'
-                placeholder=''
-                error={!!errors.city}
-                helperText={errors.city ? String(errors.city.message) : ''}
-              />
-            )}
+            render={({ field }) => <TextField {...field} fullWidth label='Ciudad' placeholder='' />}
           />
         </Grid>
         <Grid item xs={12} md={6}>
-          <FormControl fullWidth error={!!errors.country}>
+          <FormControl fullWidth>
             <InputLabel>País</InputLabel>
             <Controller
               name='country'
               control={control}
               defaultValue='republica dominicana'
-              rules={{ required: 'País es requerido' }}
               render={({ field }) => (
                 <Select {...field} label='País' disabled>
                   <MenuItem value='republica dominicana'>República Dominicana</MenuItem>
                 </Select>
               )}
             />
-            {errors.country && <Typography color='error'>{String(errors.country.message)}</Typography>}
           </FormControl>
         </Grid>
         <Grid item xs={12} className='flex justify-between'>
@@ -209,4 +142,3 @@ const BusinessInfo = ({ handlePrev, activeStep, onSubmit }: StepPersonalInfoProp
 }
 
 export default BusinessInfo
-

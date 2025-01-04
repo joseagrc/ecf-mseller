@@ -54,9 +54,9 @@ const getStepContent = (
 ) => {
   switch (step) {
     case 0:
-      return <StepAccountDetails activeStep={step} handleNext={handleNext} onSubmit={onSubmit} />
+      return <StepAccountDetails activeStep={step} handleNext={handleNext} />
     case 1:
-      return <BusinessInfo activeStep={step} handleNext={handleNext} handlePrev={handlePrev} onSubmit={onSubmit} />
+      return <BusinessInfo activeStep={step} handleNext={handleNext} handlePrev={handlePrev} />
     case 2:
       return <StepBillingDetails activeStep={step} handlePrev={handlePrev} onSubmit={onSubmit} />
     default:
@@ -74,23 +74,24 @@ const RegisterMultiSteps = () => {
 
   const methods = useForm({
     defaultValues: {
-      firstName: '',
-      lastName: '',
+      givenName: '',
+      familyName: '',
       email: '',
+      jobTitle: '',
       password: '',
       confirmPassword: '',
       businessName: '',
       rnc: '',
       confirmRnc: '',
-      phone: '',
-      pinCode: '',
-      address: '',
-      city: '',
-      country: 'republica dominicana',
-      cardNumber: '',
-      nameOnCard: '',
-      expiryDate: '',
-      cvv: ''
+      businessPhone: '',
+      businessWebsite: '',
+      businessAddress: '',
+      businessCity: '',
+      businessCountry: 'republica dominicana',
+      businessCategory: '',
+      howTheyFoundYou: '',
+      interestedInProvidingService: '',
+      termsAccepted: false
     }
   })
 
