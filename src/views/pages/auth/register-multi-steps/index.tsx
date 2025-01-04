@@ -3,8 +3,11 @@
 // React Imports
 import { useState } from 'react'
 
-// Next Imports
 import Link from 'next/link'
+
+import { useForm, FormProvider } from 'react-hook-form'
+
+// Next Imports
 
 // MUI Imports
 import Stepper from '@mui/material/Stepper'
@@ -43,15 +46,19 @@ const steps = [
   }
 ]
 
-const getStepContent = (step: number, handleNext: () => void, handlePrev: () => void) => {
+const getStepContent = (
+  step: number,
+  handleNext: () => void,
+  handlePrev: () => void,
+  onSubmit: (data: any) => void
+) => {
   switch (step) {
     case 0:
-      return <StepAccountDetails activeStep={step} handleNext={handleNext} />
+      return <StepAccountDetails activeStep={step} handleNext={handleNext} onSubmit={onSubmit} />
     case 1:
-      return <BusinessInfo activeStep={step} handleNext={handleNext} handlePrev={handlePrev} />
+      return <BusinessInfo activeStep={step} handleNext={handleNext} handlePrev={handlePrev} onSubmit={onSubmit} />
     case 2:
-      return <StepBillingDetails activeStep={step} handlePrev={handlePrev} />
-
+      return <StepBillingDetails activeStep={step} handlePrev={handlePrev} onSubmit={onSubmit} />
     default:
       return null
   }
@@ -65,6 +72,28 @@ const RegisterMultiSteps = () => {
   const { settings } = useSettings()
   const theme = useTheme()
 
+  const methods = useForm({
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      businessName: '',
+      rnc: '',
+      confirmRnc: '',
+      phone: '',
+      pinCode: '',
+      address: '',
+      city: '',
+      country: 'republica dominicana',
+      cardNumber: '',
+      nameOnCard: '',
+      expiryDate: '',
+      cvv: ''
+    }
+  })
+
   // Handle Stepper
   const handleNext = () => {
     setActiveStep(activeStep + 1)
@@ -76,51 +105,66 @@ const RegisterMultiSteps = () => {
     }
   }
 
+  const onSubmit = (data: any) => {
+    console.log(data)
+
+    if (activeStep === steps.length - 1) {
+      alert('Form submitted successfully!')
+    } else {
+      handleNext()
+    }
+  }
+
   return (
-    <div className='flex bs-full justify-between items-center'>
-      <div
-        className={classnames('flex bs-full items-center justify-center is-[594px] max-md:hidden', {
-          'border-ie': settings.skin === 'bordered'
-        })}
-      >
-        <img
-          src='/images/illustrations/objects/e-cf-registration-image.png'
-          alt='multi-steps-character'
-          className={classnames('mis-[12px] bs-auto max-bs-[428px] max-is-full', {
-            'scale-x-[-1]': theme.direction === 'rtl'
+    <FormProvider {...methods}>
+      <div className='flex bs-full justify-between items-center'>
+        <div
+          className={classnames('flex bs-full items-center justify-center is-[594px] max-md:hidden', {
+            'border-ie': settings.skin === 'bordered'
           })}
-        />
-      </div>
-      <div className='flex justify-center items-center bs-full is-full bg-backgroundPaper'>
-        <Link href={'/'} className='absolute block-start-5 sm:block-start-[25px] inline-start-6 sm:inline-start-[25px]'>
-          <Logo />
-        </Link>
-        <StepperWrapper className='p-5 sm:p-8 is-[700px]'>
-          <Stepper className='mbe-12 mbs-16 sm:mbs-0' activeStep={activeStep}>
-            {steps.map((step, index) => {
-              return (
-                <Step key={index} onClick={() => setActiveStep(index)}>
-                  <StepLabel StepIconComponent={StepperCustomDot}>
-                    <div className='step-label cursor-pointer'>
-                      <Typography className='step-number' color='text.primary'>{`0${index + 1}`}</Typography>
-                      <div>
-                        <Typography className='step-title' color='text.primary'>
-                          {step.title}
-                        </Typography>
-                        <Typography className='step-subtitle' color='text.primary'>
-                          {step.subtitle}
-                        </Typography>
-                      </div>
-                    </div>
-                  </StepLabel>
-                </Step>
-              )
+        >
+          <img
+            src='/images/illustrations/objects/e-cf-registration-image.png'
+            alt='multi-steps-character'
+            className={classnames('mis-[12px] bs-auto max-bs-[428px] max-is-full', {
+              'scale-x-[-1]': theme.direction === 'rtl'
             })}
-          </Stepper>
-          {getStepContent(activeStep, handleNext, handlePrev)}
-        </StepperWrapper>
+          />
+        </div>
+        <div className='flex justify-center items-center bs-full is-full bg-backgroundPaper'>
+          <Link
+            href={'/'}
+            className='absolute block-start-5 sm:block-start-[25px] inline-start-6 sm:inline-start-[25px]'
+          >
+            <Logo />
+          </Link>
+          <StepperWrapper className='p-5 sm:p-8 is-[700px]'>
+            <Stepper className='mbe-12 mbs-16 sm:mbs-0' activeStep={activeStep}>
+              {steps.map((step, index) => {
+                return (
+                  <Step key={index} onClick={() => setActiveStep(index)}>
+                    <StepLabel StepIconComponent={StepperCustomDot}>
+                      <div className='step-label cursor-pointer'>
+                        <Typography className='step-number' color='text.primary'>{`0${index + 1}`}</Typography>
+                        <div>
+                          <Typography className='step-title' color='text.primary'>
+                            {step.title}
+                          </Typography>
+                          <Typography className='step-subtitle' color='text.primary'>
+                            {step.subtitle}
+                          </Typography>
+                        </div>
+                      </div>
+                    </StepLabel>
+                  </Step>
+                )
+              })}
+            </Stepper>
+            {getStepContent(activeStep, handleNext, handlePrev, methods.handleSubmit(onSubmit))}
+          </StepperWrapper>
+        </div>
       </div>
-    </div>
+    </FormProvider>
   )
 }
 

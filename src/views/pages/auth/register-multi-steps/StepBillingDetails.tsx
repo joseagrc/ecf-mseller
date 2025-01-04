@@ -1,6 +1,9 @@
 // React Imports
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+
 import type { ChangeEvent } from 'react'
+
+import { Controller, useFormContext } from 'react-hook-form'
 
 // MUI Imports
 import Grid from '@mui/material/Grid'
@@ -18,6 +21,7 @@ import type { CustomInputVerticalData } from '@core/components/custom-inputs/typ
 type StepBillingDetailsProps = {
   handlePrev: () => void
   activeStep: number
+  onSubmit: (data: any) => void
 }
 
 // Styled Components
@@ -100,20 +104,25 @@ const customInputData: CustomInputVerticalData[] = [
   }
 ]
 
-const StepBillingDetails = ({ handlePrev, activeStep }: StepBillingDetailsProps) => {
+const StepBillingDetails = ({ handlePrev, activeStep, onSubmit }: StepBillingDetailsProps) => {
   // States
   const [selectedOption, setSelectedOption] = useState<string>('free')
 
+  const { control, handleSubmit, setValue } = useFormContext()
+
+  // Set default plan value
+  useEffect(() => {
+    setValue('plan', 'free')
+  }, [])
+
   const handleOptionChange = (prop: string | ChangeEvent<HTMLInputElement>) => {
-    if (typeof prop === 'string') {
-      setSelectedOption(prop)
-    } else {
-      setSelectedOption((prop.target as HTMLInputElement).value)
-    }
+    const value = typeof prop === 'string' ? prop : (prop.target as HTMLInputElement).value
+    setSelectedOption(value)
+    setValue('plan', value)
   }
 
   return (
-    <>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <div className='mbe-5'>
         <Typography variant='h4'>Seleccionar Plan</Typography>
         <Typography>Seleccionar el plan acomodado</Typography>
@@ -138,17 +147,42 @@ const StepBillingDetails = ({ handlePrev, activeStep }: StepBillingDetailsProps)
       </div>
       <Grid container spacing={5}>
         <Grid item xs={12}>
-          <TextField disabled fullWidth label='Card Number' placeholder='1234 1234 1234 1234' />
+          <Controller
+            name='cardNumber'
+            control={control}
+            defaultValue=''
+            render={({ field }) => (
+              <TextField {...field} disabled fullWidth label='Card Number' placeholder='1234 1234 1234 1234' />
+            )}
+          />
         </Grid>
         <Grid item xs={12} sm={4}>
-          <TextField disabled fullWidth label='Name on Card' placeholder='John Doe' />
+          <Controller
+            name='nameOnCard'
+            control={control}
+            defaultValue=''
+            render={({ field }) => (
+              <TextField {...field} disabled fullWidth label='Name on Card' placeholder='John Doe' />
+            )}
+          />
         </Grid>
         <Grid item xs={12} sm={4}>
-          <TextField disabled fullWidth label='Expiry Date' placeholder='MM/YY' />
+          <Controller
+            name='expiryDate'
+            control={control}
+            defaultValue=''
+            render={({ field }) => <TextField {...field} disabled fullWidth label='Expiry Date' placeholder='MM/YY' />}
+          />
         </Grid>
         <Grid item xs={12} sm={4}>
-          <TextField disabled fullWidth label='CVV' placeholder='123' />
+          <Controller
+            name='cvv'
+            control={control}
+            defaultValue=''
+            render={({ field }) => <TextField {...field} disabled fullWidth label='CVV' placeholder='123' />}
+          />
         </Grid>
+
         <Grid item xs={12} className='flex justify-between'>
           <Button
             disabled={activeStep === 0}
@@ -159,17 +193,12 @@ const StepBillingDetails = ({ handlePrev, activeStep }: StepBillingDetailsProps)
           >
             Anterior
           </Button>
-          <Button
-            variant='contained'
-            color='success'
-            onClick={() => alert('Submitted..!!')}
-            endIcon={<i className='ri-check-line' />}
-          >
+          <Button type='submit' variant='contained' color='success' endIcon={<i className='ri-check-line' />}>
             Crear Cuenta
           </Button>
         </Grid>
       </Grid>
-    </>
+    </form>
   )
 }
 
