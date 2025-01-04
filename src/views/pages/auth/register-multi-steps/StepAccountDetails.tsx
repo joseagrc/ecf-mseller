@@ -1,15 +1,16 @@
 // React Imports
 import { useState } from 'react'
+
 import { Controller, useFormContext } from 'react-hook-form'
 
 // MUI Imports
-import Grid from '@mui/material/Grid'
+import { FormControl, InputLabel, MenuItem, Select } from '@mui/material'
 import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
-import Typography from '@mui/material/Typography'
+import Grid from '@mui/material/Grid'
 import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
-import { FormControl, InputLabel, MenuItem, Select } from '@mui/material'
+import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
 
 // Component Imports
 import DirectionalIcon from '@components/DirectionalIcon'
@@ -55,7 +56,6 @@ const StepAccountDetails = ({ activeStep, handleNext }: StepAccountDetailsProps)
 
   const {
     control,
-    handleSubmit,
     watch,
     formState: { errors }
   } = useFormContext()

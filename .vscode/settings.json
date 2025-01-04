@@ -12,9 +12,9 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit",
-    "source.organizeImports": "never",
-    "source.fixAll.stylelint": "explicit"
+    "source.fixAll.eslint": "always",
+    "source.organizeImports": "always",
+    "source.fixAll.stylelint": "always"
   },
   // Extension: Git
   "git.rebaseWhenSync": true,

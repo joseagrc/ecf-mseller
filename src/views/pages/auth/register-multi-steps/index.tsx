@@ -124,6 +124,7 @@ const RegisterMultiSteps = () => {
         }
 
         const result = await response.json()
+
         console.log('User added successfully:', result)
         alert('Form submitted successfully!')
       } catch (error) {
