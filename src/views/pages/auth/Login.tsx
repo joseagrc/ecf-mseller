@@ -6,6 +6,11 @@ import { useState } from 'react'
 // Next Imports
 import { useRouter } from 'next/navigation'
 
+import { useForm, Controller } from 'react-hook-form'
+import { signIn } from 'next-auth/react'
+import * as yup from 'yup'
+import { yupResolver } from '@hookform/resolvers/yup'
+
 // MUI Imports
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
@@ -14,12 +19,13 @@ import InputAdornment from '@mui/material/InputAdornment'
 import Checkbox from '@mui/material/Checkbox'
 import Button from '@mui/material/Button'
 import FormControlLabel from '@mui/material/FormControlLabel'
-import Divider from '@mui/material/Divider'
 
 // Third-party Imports
 import classnames from 'classnames'
 
 // Type Imports
+import { FormControl, FormHelperText } from '@mui/material'
+
 import type { Mode } from '@core/types'
 
 // Component Imports
@@ -33,6 +39,21 @@ import themeConfig from '@configs/themeConfig'
 // Hook Imports
 import { useImageVariant } from '@core/hooks/useImageVariant'
 import { useSettings } from '@core/hooks/useSettings'
+
+const schema = yup.object().shape({
+  email: yup.string().email().required(),
+  password: yup.string().min(5).required()
+})
+
+const defaultValues = {
+  password: '',
+  email: ''
+}
+
+interface FormData {
+  email: string
+  password: string
+}
 
 const LoginV2 = ({ mode }: { mode: Mode }) => {
   // States
@@ -60,6 +81,39 @@ const LoginV2 = ({ mode }: { mode: Mode }) => {
   )
 
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting }
+  } = useForm({
+    defaultValues,
+
+    // mode: 'onBlur',
+    resolver: yupResolver(schema)
+  })
+
+  const onSubmit = async (data: FormData) => {
+    const { email, password } = data
+
+    try {
+      const result = await signIn('cognito', {
+        email: email,
+        password: password,
+        redirect: false
+      })
+
+      if (result?.error) {
+        // Handle error
+        console.error('SignIn Error:', result.error)
+      } else {
+        // Redirect on success
+        router.push('/home')
+      }
+    } catch (error) {
+      console.error('SignIn Exception:', error)
+    }
+  }
 
   return (
     <div className='flex bs-full justify-center'>
@@ -90,54 +144,83 @@ const LoginV2 = ({ mode }: { mode: Mode }) => {
         </Link>
         <div className='flex flex-col gap-5 is-full sm:is-auto md:is-full sm:max-is-[400px] md:max-is-[unset]'>
           <div>
-            <Typography variant='h4'>{`Welcome to ${themeConfig.templateName}!👋🏻`}</Typography>
-            <Typography className='mbs-1'>Please sign-in to your account and start the adventure</Typography>
+            <Typography variant='h4'>{`Bienvenido a ${themeConfig.templateName}!`}</Typography>
+            <Typography className='mbs-1'>Inicie sesión para consultar sus facturas electrónicas</Typography>
           </div>
-          <form
-            noValidate
-            autoComplete='off'
-            onSubmit={e => {
-              e.preventDefault()
-              router.push('/')
-            }}
-            className='flex flex-col gap-5'
-          >
-            <TextField autoFocus fullWidth label='Email' />
-            <TextField
-              fullWidth
-              label='Password'
-              type={isPasswordShown ? 'text' : 'password'}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position='end'>
-                    <IconButton
-                      size='small'
-                      edge='end'
-                      onClick={handleClickShowPassword}
-                      onMouseDown={e => e.preventDefault()}
-                    >
-                      <i className={isPasswordShown ? 'ri-eye-off-line' : 'ri-eye-line'} />
-                    </IconButton>
-                  </InputAdornment>
-                )
-              }}
-            />
+          <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-5'>
+            <FormControl fullWidth sx={{ mb: 4 }}>
+              <Controller
+                name='email'
+                control={control}
+                rules={{ required: true }}
+                render={({ field: { value, onChange, onBlur } }) => (
+                  <TextField
+                    autoFocus
+                    label='Correo Electrónico'
+                    value={value}
+                    onBlur={onBlur}
+                    onChange={onChange}
+                    error={Boolean(errors.email)}
+                    placeholder='correo eléctronico'
+                    disabled={isSubmitting}
+                  />
+                )}
+              />
+              {errors.email && <FormHelperText sx={{ color: 'error.main' }}>{errors.email.message}</FormHelperText>}
+            </FormControl>
+            <FormControl fullWidth sx={{ mb: 4 }}>
+              <Controller
+                name='password'
+                control={control}
+                rules={{ required: true }}
+                render={({ field: { value, onChange, onBlur } }) => (
+                  <TextField
+                    fullWidth
+                    label='Contraseña'
+                    type={isPasswordShown ? 'text' : 'password'}
+                    value={value}
+                    onBlur={onBlur}
+                    onChange={onChange}
+                    error={Boolean(errors.password)}
+                    placeholder='contraseña'
+                    disabled={isSubmitting}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position='end'>
+                          <IconButton
+                            size='small'
+                            edge='end'
+                            onClick={handleClickShowPassword}
+                            onMouseDown={e => e.preventDefault()}
+                          >
+                            <i className={isPasswordShown ? 'ri-eye-off-line' : 'ri-eye-line'} />
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }}
+                  />
+                )}
+              />
+              {errors.password && (
+                <FormHelperText sx={{ color: 'error.main' }}>{errors.password.message}</FormHelperText>
+              )}
+            </FormControl>
             <div className='flex justify-between items-center flex-wrap gap-x-3 gap-y-1'>
-              <FormControlLabel control={<Checkbox />} label='Remember me' />
-              <Typography className='text-end' color='primary' component={Link}>
-                Forgot password?
+              <FormControlLabel control={<Checkbox />} label='Recordarme' />
+              <Typography className='text-end' color='primary' component={Link} href='/forgot-password'>
+                Olvidó la contraseña?
               </Typography>
             </div>
             <Button fullWidth variant='contained' type='submit'>
-              Log In
+              Iniciar Sesión
             </Button>
             <div className='flex justify-center items-center flex-wrap gap-2'>
-              <Typography>New on our platform?</Typography>
-              <Typography component={Link} color='primary'>
-                Create an account
+              <Typography>Nuevo en nuestra plataforma?</Typography>
+              <Typography component={Link} color='primary' href='/register'>
+                Crear una nueva cuenta
               </Typography>
             </div>
-            <Divider className='gap-3'>or</Divider>
+            {/* <Divider className='gap-3'>or</Divider>
             <div className='flex justify-center items-center gap-2'>
               <IconButton size='small' className='text-facebook'>
                 <i className='ri-facebook-fill' />
@@ -151,7 +234,7 @@ const LoginV2 = ({ mode }: { mode: Mode }) => {
               <IconButton size='small' className='text-googlePlus'>
                 <i className='ri-google-fill' />
               </IconButton>
-            </div>
+            </div> */}
           </form>
         </div>
       </div>

@@ -8,13 +8,14 @@ import { getServerSession } from 'next-auth'
 import type { ChildrenType } from '@core/types'
 
 // Config Imports
-import themeConfig from '@configs/themeConfig'
+//import themeConfig from '@configs/themeConfig'
 
 const GuestOnlyRoute = async ({ children }: ChildrenType) => {
   const session = await getServerSession()
 
   if (session) {
-    redirect(themeConfig.homePageUrl)
+    // redirect(themeConfig.homePageUrl)
+    redirect('/home')
   }
 
   return <>{children}</>

@@ -22,10 +22,9 @@ const FooterContent = () => {
     >
       <p>
         <span>{`© ${new Date().getFullYear()}, Made with `}</span>
-        <span>{`❤️`}</span>
         <span>{` by `}</span>
-        <Link href='https://mui.com/store/contributors/themeselection' target='_blank' className='text-primary'>
-          ThemeSelection
+        <Link href='https:/mseller.app' target='_blank' className='text-primary'>
+          MSeller.app
         </Link>
       </p>
       {!isBreakpointReached && (
@@ -33,7 +32,7 @@ const FooterContent = () => {
           <Link href='https://mui.com/store/license' target='_blank' className='text-primary'>
             License
           </Link>
-          <Link href='https://mui.com/store/contributors/themeselection' target='_blank' className='text-primary'>
+          <Link href='https:/mseller.app' target='_blank' className='text-primary'>
             More Themes
           </Link>
           <Link
