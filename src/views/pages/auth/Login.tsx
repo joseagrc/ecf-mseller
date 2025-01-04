@@ -62,8 +62,8 @@ const LoginV2 = ({ mode }: { mode: Mode }) => {
   // Vars
   const darkImg = '/images/pages/auth-v2-mask-dark.png'
   const lightImg = '/images/pages/auth-v2-mask-light.png'
-  const darkIllustration = '/images/illustrations/auth/v2-login-dark.png'
-  const lightIllustration = '/images/illustrations/auth/v2-login-light.png'
+  const darkIllustration = '/images/illustrations/auth/login-man-invoice.png'
+  const lightIllustration = '/images/illustrations/auth/login-man-invoice.png'
   const borderedDarkIllustration = '/images/illustrations/auth/v2-login-dark-border.png'
   const borderedLightIllustration = '/images/illustrations/auth/v2-login-light-border.png'
 
