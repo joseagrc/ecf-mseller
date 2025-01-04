@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json()
-    const path = '/dev/customer/signup'
+    const path = '/TesteCF/customer/signup'
     const response = await fetch((process.env.AWS_API_GATEWAY_URL + path) as string, {
       method: 'POST',
       headers: {
@@ -11,7 +11,6 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify(data)
     })
-
     if (!response.ok) {
       throw new Error('Network response was not ok')
     }

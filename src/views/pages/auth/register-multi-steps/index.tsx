@@ -90,7 +90,7 @@ const RegisterMultiSteps = () => {
       businessCountry: 'republica dominicana',
       businessCategory: '',
       howTheyFoundYou: '',
-      interestedInProvidingService: '',
+      isProvider: '',
       termsAccepted: false
     }
   })

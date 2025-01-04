@@ -56,7 +56,7 @@ const Content = styled(Typography, {
 const customInputData: CustomInputVerticalData[] = [
   {
     title: 'Gratis',
-    value: 'free',
+    value: 'FREE',
     content: (
       <Content component='div' className='flex justify-center items-center flex-col bs-full gap-2'>
         <Typography variant='body2' className='mlb-auto'>
@@ -79,7 +79,7 @@ const customInputData: CustomInputVerticalData[] = [
   },
   {
     title: 'Estándar',
-    value: 'standard',
+    value: 'STANDARD',
     content: (
       <Content component='div' className='flex justify-center items-center flex-col bs-full'>
         <Typography variant='body2' className='mlb-auto'>
@@ -101,7 +101,7 @@ const customInputData: CustomInputVerticalData[] = [
   },
   {
     title: 'Empresarial',
-    value: 'enterprise',
+    value: 'ENTERPRISE',
     content: (
       <Content component='div' className='flex justify-center items-center flex-col bs-full'>
         <Typography variant='body2' className='mlb-auto'>
@@ -139,7 +139,7 @@ const howTheyFoundYouOptions: OptionType[] = [
 
 const StepBillingDetails = ({ handlePrev, activeStep, onSubmit }: StepBillingDetailsProps) => {
   // States
-  const [selectedOption, setSelectedOption] = useState<string>('free')
+  const [selectedOption, setSelectedOption] = useState<string>('FREE')
   const [openTermsDialog, setOpenTermsDialog] = useState<boolean>(false)
 
   const {
@@ -151,7 +151,7 @@ const StepBillingDetails = ({ handlePrev, activeStep, onSubmit }: StepBillingDet
 
   // Set default plan value
   useEffect(() => {
-    setValue('plan', 'free')
+    setValue('plan', 'FREE')
   }, [setValue])
 
   const handleOptionChange = (prop: string | ChangeEvent<HTMLInputElement>) => {
@@ -219,10 +219,10 @@ const StepBillingDetails = ({ handlePrev, activeStep, onSubmit }: StepBillingDet
           </FormControl>
         </Grid>
         <Grid item xs={12} sm={6}>
-          <FormControl component='fieldset' error={!!errors.interestedInProvidingService}>
+          <FormControl component='fieldset' error={!!errors.isProvider}>
             <Typography component='legend'>¿Está interesado en proporcionar este servicio a tus clientes?</Typography>
             <Controller
-              name='interestedInProvidingService'
+              name='isProvider'
               control={control}
               defaultValue=''
               rules={{ required: 'Este campo es requerido' }}
@@ -233,9 +233,7 @@ const StepBillingDetails = ({ handlePrev, activeStep, onSubmit }: StepBillingDet
                 </RadioGroup>
               )}
             />
-            {errors.interestedInProvidingService && (
-              <Typography color='error'>{String(errors.interestedInProvidingService.message)}</Typography>
-            )}
+            {errors.isProvider && <Typography color='error'>{String(errors.isProvider.message)}</Typography>}
           </FormControl>
         </Grid>
         <Grid item xs={12}>

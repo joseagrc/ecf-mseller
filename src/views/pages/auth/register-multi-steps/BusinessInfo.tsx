@@ -19,7 +19,6 @@ type StepPersonalInfoProps = {
   handleNext: () => void
   handlePrev: () => void
   activeStep: number
-  onSubmit: (data: any) => void
 }
 
 interface OptionType {
@@ -68,10 +67,9 @@ const salesRanges: OptionType[] = [
   { label: 'Más de RD$1,000,000', value: '>1000000' }
 ]
 
-const BusinessInfo = ({ handlePrev, activeStep, onSubmit }: StepPersonalInfoProps) => {
+const BusinessInfo = ({ handlePrev, activeStep, handleNext }: StepPersonalInfoProps) => {
   const {
     control,
-    handleSubmit,
     watch,
     formState: { errors }
   } = useFormContext()
@@ -79,7 +77,7 @@ const BusinessInfo = ({ handlePrev, activeStep, onSubmit }: StepPersonalInfoProp
   const rnc = watch('rnc')
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form>
       <div className='mbe-5'>
         <Typography variant='h4'>Información del negocio</Typography>
         <Typography>Entidad autorizada por la DGII</Typography>
@@ -108,7 +106,10 @@ const BusinessInfo = ({ handlePrev, activeStep, onSubmit }: StepPersonalInfoProp
             name='rnc'
             control={control}
             defaultValue=''
-            rules={{ required: 'RNC es requerido' }}
+            rules={{
+              required: 'RNC es requerido',
+              minLength: { value: 8, message: 'El RNC debe tener al menos 8 caracteres' }
+            }}
             render={({ field }) => (
               <TextField
                 {...field}
@@ -284,6 +285,7 @@ const BusinessInfo = ({ handlePrev, activeStep, onSubmit }: StepPersonalInfoProp
           <Button
             type='submit'
             variant='contained'
+            onClick={handleNext}
             endIcon={<DirectionalIcon ltrIconClass='ri-arrow-right-line' rtlIconClass='ri-arrow-left-line' />}
           >
             Siguiente
