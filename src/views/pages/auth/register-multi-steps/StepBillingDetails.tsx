@@ -113,10 +113,11 @@ const StepBillingDetails = ({ handlePrev, activeStep, onSubmit }: StepBillingDet
   // Set default plan value
   useEffect(() => {
     setValue('plan', 'free')
-  }, [])
+  }, [setValue])
 
   const handleOptionChange = (prop: string | ChangeEvent<HTMLInputElement>) => {
     const value = typeof prop === 'string' ? prop : (prop.target as HTMLInputElement).value
+
     setSelectedOption(value)
     setValue('plan', value)
   }
