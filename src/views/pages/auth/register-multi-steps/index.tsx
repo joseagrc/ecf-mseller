@@ -106,11 +106,29 @@ const RegisterMultiSteps = () => {
     }
   }
 
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: any) => {
     console.log(data)
 
     if (activeStep === steps.length - 1) {
-      alert('Form submitted successfully!')
+      try {
+        const response = await fetch('/api/add-user', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        })
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok')
+        }
+
+        const result = await response.json()
+        console.log('User added successfully:', result)
+        alert('Form submitted successfully!')
+      } catch (error) {
+        console.error('Error adding user:', error)
+      }
     } else {
       handleNext()
     }
