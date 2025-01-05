@@ -5,14 +5,16 @@ import { useState } from 'react'
 
 import Link from 'next/link'
 
-import { useForm, FormProvider } from 'react-hook-form'
+import { useRouter } from 'next/navigation'
+
+import { FormProvider, useForm } from 'react-hook-form'
 
 // Next Imports
 
 // MUI Imports
-import Stepper from '@mui/material/Stepper'
 import Step from '@mui/material/Step'
 import StepLabel from '@mui/material/StepLabel'
+import Stepper from '@mui/material/Stepper'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 
@@ -20,12 +22,16 @@ import { useTheme } from '@mui/material/styles'
 import classnames from 'classnames'
 
 // Component Imports
-import StepperWrapper from '@core/styles/stepper'
-import StepAccountDetails from './StepAccountDetails'
-import BusinessInfo from './BusinessInfo'
-import StepBillingDetails from './StepBillingDetails'
-import StepperCustomDot from '@components/stepper-dot'
+import { toast } from 'react-toastify'
+
+import { Button } from '@mui/material'
+
 import Logo from '@components/layout/shared/Logo'
+import StepperCustomDot from '@components/stepper-dot'
+import StepperWrapper from '@core/styles/stepper'
+import BusinessInfo from './BusinessInfo'
+import StepAccountDetails from './StepAccountDetails'
+import StepBillingDetails from './StepBillingDetails'
 
 // Hook Imports
 import { useSettings } from '@core/hooks/useSettings'
@@ -67,6 +73,9 @@ const getStepContent = (
 const RegisterMultiSteps = () => {
   // States
   const [activeStep, setActiveStep] = useState<number>(0)
+  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [submittedEmail, setSubmittedEmail] = useState('')
+  const router = useRouter()
 
   // Hooks
   const { settings } = useSettings()
@@ -123,12 +132,14 @@ const RegisterMultiSteps = () => {
           throw new Error('Network response was not ok')
         }
 
-        const result = await response.json()
+        await response.json()
 
-        console.log('User added successfully:', result)
-        alert('Form submitted successfully!')
+        setSubmittedEmail(data.email)
+        setIsSubmitted(true)
+        toast.success('Cuenta creada exitosamente')
       } catch (error) {
         console.error('Error adding user:', error)
+        toast.error('Error creando cuenta')
       }
     } else {
       handleNext()
@@ -158,30 +169,57 @@ const RegisterMultiSteps = () => {
           >
             <Logo />
           </Link>
-          <StepperWrapper className='p-5 sm:p-8 is-[700px]'>
-            <Stepper className='mbe-12 mbs-16 sm:mbs-0' activeStep={activeStep}>
-              {steps.map((step, index) => {
-                return (
-                  <Step key={index} onClick={() => setActiveStep(index)}>
-                    <StepLabel StepIconComponent={StepperCustomDot}>
-                      <div className='step-label cursor-pointer'>
-                        <Typography className='step-number' color='text.primary'>{`0${index + 1}`}</Typography>
-                        <div>
-                          <Typography className='step-title' color='text.primary'>
-                            {step.title}
-                          </Typography>
-                          <Typography className='step-subtitle' color='text.primary'>
-                            {step.subtitle}
-                          </Typography>
+          {isSubmitted ? (
+            <StepperWrapper className='p-5 sm:p-8 is-[700px]'>
+              <Stepper className='mbe-12 mbs-16 sm:mbs-0' activeStep={activeStep}>
+                {steps.map((step, index) => {
+                  return (
+                    <Step key={index} onClick={() => setActiveStep(index)}>
+                      <StepLabel StepIconComponent={StepperCustomDot}>
+                        <div className='step-label cursor-pointer'>
+                          <Typography className='step-number' color='text.primary'>{`0${index + 1}`}</Typography>
+                          <div>
+                            <Typography className='step-title' color='text.primary'>
+                              {step.title}
+                            </Typography>
+                            <Typography className='step-subtitle' color='text.primary'>
+                              {step.subtitle}
+                            </Typography>
+                          </div>
                         </div>
-                      </div>
-                    </StepLabel>
-                  </Step>
-                )
-              })}
-            </Stepper>
-            {getStepContent(activeStep, handleNext, handlePrev, methods.handleSubmit(onSubmit))}
-          </StepperWrapper>
+                      </StepLabel>
+                    </Step>
+                  )
+                })}
+              </Stepper>
+              {getStepContent(activeStep, handleNext, handlePrev, methods.handleSubmit(onSubmit))}
+            </StepperWrapper>
+          ) : (
+            <div className='flex flex-col items-center justify-center p-8 text-center'>
+              <Typography variant='h4' className='mb-4 font-bold'>
+                ¡Gracias por crear tu cuenta!
+              </Typography>
+              <img
+                src='/images/illustrations/objects/applause.png'
+                alt='applause account created'
+                className={classnames('mis-[12px] bs-auto max-bs-[428px] max-is-full my-8', {
+                  'scale-x-[-1]': theme.direction === 'rtl'
+                })}
+              />
+              <Typography variant='body1' className='mb-6'>
+                Aún falta un paso más. Hemos enviado un código de verificación a tu correo electrónico: {submittedEmail}
+              </Typography>
+              <Typography variant='body2' color='text.secondary' className='mb-6'>
+                Por favor, revisa tu bandeja de entrada y la carpeta de spam.
+              </Typography>
+              <Button
+                variant='contained'
+                onClick={() => router.push(`/verify-account?email=${encodeURIComponent(submittedEmail)}`)}
+              >
+                Verificar cuenta
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </FormProvider>

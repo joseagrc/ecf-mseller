@@ -1,35 +1,36 @@
 // React Imports
-import { useEffect, useState } from 'react'
 import type { ChangeEvent } from 'react'
+import { useEffect, useState } from 'react'
 
 // Third-Party Imports
 import { Controller, useFormContext } from 'react-hook-form'
 
 // MUI Imports
-import Grid from '@mui/material/Grid'
+import { LoadingButton } from '@mui/lab'
+import { Stack } from '@mui/material'
 import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
-import type { TypographyProps } from '@mui/material/Typography'
-import { styled } from '@mui/material/styles'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import Select from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
-import RadioGroup from '@mui/material/RadioGroup'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Radio from '@mui/material/Radio'
 import Checkbox from '@mui/material/Checkbox'
-import Link from '@mui/material/Link'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
-import { Stack } from '@mui/material'
+import FormControl from '@mui/material/FormControl'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import Grid from '@mui/material/Grid'
+import InputLabel from '@mui/material/InputLabel'
+import Link from '@mui/material/Link'
+import MenuItem from '@mui/material/MenuItem'
+import Radio from '@mui/material/Radio'
+import RadioGroup from '@mui/material/RadioGroup'
+import Select from '@mui/material/Select'
+import type { TypographyProps } from '@mui/material/Typography'
+import Typography from '@mui/material/Typography'
+import { styled } from '@mui/material/styles'
 
 // Component Imports
-import CustomInputVertical from '@core/components/custom-inputs/Vertical'
 import DirectionalIcon from '@components/DirectionalIcon'
+import CustomInputVertical from '@core/components/custom-inputs/Vertical'
 import type { CustomInputVerticalData } from '@core/components/custom-inputs/types'
 
 type StepBillingDetailsProps = {
@@ -204,6 +205,7 @@ const StepBillingDetails = ({ handlePrev, activeStep, onSubmit }: StepBillingDet
               name='howTheyFoundYou'
               control={control}
               defaultValue=''
+              disabled={isSubmitting}
               rules={{ required: 'Este campo es requerido' }}
               render={({ field }) => (
                 <Select {...field} label='¿Cómo nos encontraste?'>
@@ -224,6 +226,7 @@ const StepBillingDetails = ({ handlePrev, activeStep, onSubmit }: StepBillingDet
             <Controller
               name='isProvider'
               control={control}
+              disabled={isSubmitting}
               defaultValue=''
               rules={{ required: 'Este campo es requerido' }}
               render={({ field }) => (
@@ -242,6 +245,7 @@ const StepBillingDetails = ({ handlePrev, activeStep, onSubmit }: StepBillingDet
               <Controller
                 name='termsAccepted'
                 control={control}
+                disabled={isSubmitting}
                 defaultValue={false}
                 rules={{ required: 'Debe aceptar los términos y condiciones' }}
                 render={({ field }) => <Checkbox {...field} color='primary' />}
@@ -269,9 +273,9 @@ const StepBillingDetails = ({ handlePrev, activeStep, onSubmit }: StepBillingDet
             Anterior
           </Button>
 
-          <Button type='submit' variant='contained' color='success' endIcon={<i className='ri-check-line' />}>
-            Crear Cuenta
-          </Button>
+          <LoadingButton variant='contained' type='submit' loading={isSubmitting} loadingPosition='center'>
+            {isSubmitting ? 'Creando Cuenta' : 'Crear Cuenta'}
+          </LoadingButton>
         </Grid>
       </Grid>
       <Dialog open={openTermsDialog} onClose={handleCloseTermsDialog}>
