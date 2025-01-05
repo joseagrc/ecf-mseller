@@ -78,10 +78,10 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
           Documentos
         </MenuItem>
         <SubMenu label={'Configuración'} icon={<i className='ri-file-settings-line' />}>
-          <MenuItem href={`/certificate`} icon={<i className='mdi-certificate' />}>
+          <MenuItem href={`/certificate/add`} icon={<i className='mdi-certificate' />}>
             Certificado
           </MenuItem>
-          <MenuItem href={`/charts/apex-charts`} icon={<i className='ri-key-2-fill' />}>
+          <MenuItem href={`/api-keys/list`} icon={<i className='ri-key-2-fill' />}>
             API Keys
           </MenuItem>
         </SubMenu>

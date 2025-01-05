@@ -2,7 +2,6 @@ import type { NextAuthOptions, Profile as NextAuthProfile } from 'next-auth'
 import NextAuth from 'next-auth'
 import CognitoProvider from 'next-auth/providers/cognito'
 import CredentialProvider from 'next-auth/providers/credentials'
-import GoogleProvider from 'next-auth/providers/google'
 
 export interface UserProfile {
   givenName: string
@@ -84,11 +83,6 @@ export const authOptions: NextAuthOptions = {
       }
     }),
 
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string
-    }),
-
     CognitoProvider({
       clientId: process.env.COGNITO_CLIENT_ID!,
       clientSecret: process.env.COGNITO_CLIENT_SECRET!,
@@ -144,6 +138,10 @@ export const authOptions: NextAuthOptions = {
       return true
     },
     async jwt({ token, user, account, profile }: any) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log(token)
+      }
+
       if (user) {
         /*
          * For adding custom parameters to user in session, we first need to add those parameters
