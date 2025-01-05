@@ -147,7 +147,7 @@ const StepBillingDetails = ({ handlePrev, activeStep, onSubmit }: StepBillingDet
     control,
     handleSubmit,
     setValue,
-    formState: { errors }
+    formState: { errors, isSubmitting }
   } = useFormContext()
 
   // Set default plan value
