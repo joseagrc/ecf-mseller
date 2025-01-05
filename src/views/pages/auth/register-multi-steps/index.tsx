@@ -34,6 +34,7 @@ import StepAccountDetails from './StepAccountDetails'
 import StepBillingDetails from './StepBillingDetails'
 
 // Hook Imports
+import DirectionalIcon from '@/components/DirectionalIcon'
 import { useSettings } from '@core/hooks/useSettings'
 
 // Vars
@@ -129,7 +130,9 @@ const RegisterMultiSteps = () => {
         })
 
         if (!response.ok) {
-          throw new Error('Network response was not ok')
+          const result = await response.json()
+
+          throw new Error(result.message)
         }
 
         await response.json()
@@ -139,7 +142,7 @@ const RegisterMultiSteps = () => {
         toast.success('Cuenta creada exitosamente')
       } catch (error) {
         console.error('Error adding user:', error)
-        toast.error('Error creando cuenta')
+        toast.error(`Error creando cuenta. \n ${(error as any)?.message || 'Por favor, intente de nuevo'}`)
       }
     } else {
       handleNext()
@@ -148,7 +151,16 @@ const RegisterMultiSteps = () => {
 
   return (
     <FormProvider {...methods}>
-      <div className='flex bs-full justify-between items-center'>
+      <div className='flex bs-full justify-between items-center relative'>
+        <Typography
+          className='flex justify-center items-center absolute top-4 right-4  items-centerz-10'
+          color='primary'
+        >
+          <Link href={'/login'} className='flex items-center'>
+            <DirectionalIcon ltrIconClass='ri-arrow-left-s-line' rtlIconClass='ri-arrow-right-s-line' />
+            <span>Ir al inicio de sesión</span>
+          </Link>
+        </Typography>
         <div
           className={classnames('flex bs-full items-center justify-center is-[594px] max-md:hidden', {
             'border-ie': settings.skin === 'bordered'
@@ -169,7 +181,7 @@ const RegisterMultiSteps = () => {
           >
             <Logo />
           </Link>
-          {isSubmitted ? (
+          {!isSubmitted ? (
             <StepperWrapper className='p-5 sm:p-8 is-[700px]'>
               <Stepper className='mbe-12 mbs-16 sm:mbs-0' activeStep={activeStep}>
                 {steps.map((step, index) => {

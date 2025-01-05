@@ -7,7 +7,7 @@ import { Controller, useFormContext } from 'react-hook-form'
 
 // MUI Imports
 import { LoadingButton } from '@mui/lab'
-import { Stack } from '@mui/material'
+import { FormLabel, Stack } from '@mui/material'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
 import Dialog from '@mui/material/Dialog'
@@ -17,6 +17,7 @@ import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import FormControl from '@mui/material/FormControl'
 import FormControlLabel from '@mui/material/FormControlLabel'
+import FormHelperText from '@mui/material/FormHelperText'
 import Grid from '@mui/material/Grid'
 import InputLabel from '@mui/material/InputLabel'
 import Link from '@mui/material/Link'
@@ -199,44 +200,48 @@ const StepBillingDetails = ({ handlePrev, activeStep, onSubmit }: StepBillingDet
       </div>
       <Grid container spacing={5}>
         <Grid item xs={12} sm={6}>
-          <FormControl fullWidth error={!!errors.howTheyFoundYou}>
-            <InputLabel>¿Cómo nos encontraste?</InputLabel>
-            <Controller
-              name='howTheyFoundYou'
-              control={control}
-              defaultValue=''
-              disabled={isSubmitting}
-              rules={{ required: 'Este campo es requerido' }}
-              render={({ field }) => (
-                <Select {...field} label='¿Cómo nos encontraste?'>
-                  {howTheyFoundYouOptions.map((option, index) => (
-                    <MenuItem key={index} value={option.value}>
+          <Controller
+            name='howTheyFoundYou'
+            control={control}
+            defaultValue=''
+            rules={{ required: 'Este campo es requerido' }}
+            render={({ field: { value, onChange, ref }, fieldState: { error } }) => (
+              <FormControl fullWidth error={!!error}>
+                <InputLabel id='howTheyFoundYou-label'>¿Cómo nos encontraste?</InputLabel>
+                <Select
+                  label='¿Cómo nos encontraste?'
+                  value={value}
+                  onChange={onChange}
+                  inputRef={ref}
+                  disabled={isSubmitting}
+                >
+                  {howTheyFoundYouOptions.map(option => (
+                    <MenuItem key={option.value} value={option.value}>
                       {option.label}
                     </MenuItem>
                   ))}
                 </Select>
-              )}
-            />
-            {errors.howTheyFoundYou && <Typography color='error'>{String(errors.howTheyFoundYou.message)}</Typography>}
-          </FormControl>
+                {error && <FormHelperText>{error.message}</FormHelperText>}
+              </FormControl>
+            )}
+          />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <FormControl component='fieldset' error={!!errors.isProvider}>
-            <Typography component='legend'>¿Está interesado en proporcionar este servicio a tus clientes?</Typography>
+          <FormControl error={!!errors.isProvider}>
+            <FormLabel>¿Te interesa proveer servicios en nuestra plataforma?</FormLabel>
             <Controller
               name='isProvider'
               control={control}
-              disabled={isSubmitting}
               defaultValue=''
               rules={{ required: 'Este campo es requerido' }}
-              render={({ field }) => (
-                <RadioGroup {...field} row>
-                  <FormControlLabel value='yes' control={<Radio />} label='Sí' />
-                  <FormControlLabel value='no' control={<Radio />} label='No' />
+              render={({ field: { onChange, value } }) => (
+                <RadioGroup row value={value} onChange={onChange}>
+                  <FormControlLabel value='yes' control={<Radio disabled={isSubmitting} />} label='Sí' />
+                  <FormControlLabel value='no' control={<Radio disabled={isSubmitting} />} label='No' />
                 </RadioGroup>
               )}
             />
-            {errors.isProvider && <Typography color='error'>{String(errors.isProvider.message)}</Typography>}
+            {errors.isProvider && <FormHelperText error>{String(errors.isProvider.message)}</FormHelperText>}
           </FormControl>
         </Grid>
         <Grid item xs={12}>
@@ -245,10 +250,17 @@ const StepBillingDetails = ({ handlePrev, activeStep, onSubmit }: StepBillingDet
               <Controller
                 name='termsAccepted'
                 control={control}
-                disabled={isSubmitting}
                 defaultValue={false}
                 rules={{ required: 'Debe aceptar los términos y condiciones' }}
-                render={({ field }) => <Checkbox {...field} color='primary' />}
+                render={({ field: { onChange, value, ref } }) => (
+                  <Checkbox
+                    checked={value}
+                    onChange={onChange}
+                    inputRef={ref}
+                    disabled={isSubmitting}
+                    color='primary'
+                  />
+                )}
               />
             }
             label={
@@ -260,7 +272,11 @@ const StepBillingDetails = ({ handlePrev, activeStep, onSubmit }: StepBillingDet
               </Typography>
             }
           />
-          {errors.termsAccepted && <Typography color='error'>{String(errors.termsAccepted.message)}</Typography>}
+          {errors.termsAccepted && (
+            <Typography color='error' variant='caption'>
+              {String(errors.termsAccepted.message)}
+            </Typography>
+          )}
         </Grid>
         <Grid item xs={12} className='flex justify-between'>
           <Button

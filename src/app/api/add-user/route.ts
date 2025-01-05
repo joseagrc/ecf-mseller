@@ -13,17 +13,17 @@ export async function POST(req: NextRequest) {
     })
 
     if (!response.ok) {
-      throw new Error('Network response was not ok')
+      const result = await response.json()
+
+      return NextResponse.json({ ...result }, { status: 500 })
     }
 
     const result = await response.json()
 
-    
-return NextResponse.json(result, { status: 200 })
+    return NextResponse.json(result, { status: 200 })
   } catch (error) {
     console.error('Error adding user:', error)
 
-    
-return NextResponse.json({ error: 'Error adding user' }, { status: 500 })
+    return NextResponse.json({ error }, { status: 500 })
   }
 }
