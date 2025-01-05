@@ -9,19 +9,19 @@ import HorizontalNav, { Menu, MenuItem } from '@menu/horizontal-menu'
 import VerticalNavContent from './VerticalNavContent'
 
 // Hook Imports
-import useVerticalNav from '@menu/hooks/useVerticalNav'
 import { useSettings } from '@core/hooks/useSettings'
+import useVerticalNav from '@menu/hooks/useVerticalNav'
 
 // Styled Component Imports
 import StyledHorizontalNavExpandIcon from '@menu/styles/horizontal/StyledHorizontalNavExpandIcon'
 import StyledVerticalNavExpandIcon from '@menu/styles/vertical/StyledVerticalNavExpandIcon'
 
 // Style Imports
-import menuRootStyles from '@core/styles/horizontal/menuRootStyles'
 import menuItemStyles from '@core/styles/horizontal/menuItemStyles'
-import verticalNavigationCustomStyles from '@core/styles/vertical/navigationCustomStyles'
+import menuRootStyles from '@core/styles/horizontal/menuRootStyles'
 import verticalMenuItemStyles from '@core/styles/vertical/menuItemStyles'
 import verticalMenuSectionStyles from '@core/styles/vertical/menuSectionStyles'
+import verticalNavigationCustomStyles from '@core/styles/vertical/navigationCustomStyles'
 
 type RenderExpandIconProps = {
   level?: number

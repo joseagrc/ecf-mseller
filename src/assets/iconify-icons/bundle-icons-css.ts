@@ -59,7 +59,16 @@ interface BundleScriptConfig {
 const sources: BundleScriptConfig = {
   json: [
     // Iconify JSON file (@iconify/json is a package name, /json/ is directory where files are, then filename)
-    require.resolve('@iconify/json/json/ri.json')
+    require.resolve('@iconify/json/json/ri.json'),
+    {
+      filename: require.resolve('@iconify/json/json/ri.json'),
+      icons: ['file-settings-line', 'settings-line', 'home-line', 'user-line', 'menu-line']
+    },
+    require.resolve('@iconify/json/json/mdi.json'),
+    {
+      filename: require.resolve('@iconify/json/json/mdi.json'),
+      icons: ['certificate']
+    }
 
     // Custom file with only few icons
     /* {
@@ -71,15 +80,14 @@ const sources: BundleScriptConfig = {
     // 'json/gg.json'
   ],
 
-  /* icons: [
-    'bx-basket',
-    'bi-airplane-engines',
-    'tabler-anchor',
-    'uit-adobe-alt',
-
-    // 'fa6-regular-comment',
-    'twemoji-auto-rickshaw'
-  ], */
+  icons: [
+    'ri:file-settings-line',
+    'ri:settings-line',
+    'ri:home-line',
+    'ri:user-line',
+    'ri:menu-line',
+    'mdi:certificate'
+  ],
 
   svg: [
     /* {
