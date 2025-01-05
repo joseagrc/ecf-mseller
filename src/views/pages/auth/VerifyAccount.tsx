@@ -4,10 +4,9 @@
 import { useEffect } from 'react'
 
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 // MUI Imports
-import router from 'next/router'
 
 import { yupResolver } from '@hookform/resolvers/yup'
 import { LoadingButton } from '@mui/lab'
@@ -50,6 +49,7 @@ const VerifyAccount = ({ mode }: { mode: Mode }) => {
   const authBackground = useImageVariant(mode, lightImg, darkImg)
 
   const searchParams = useSearchParams()
+  const router = useRouter()
   const {
     register,
     handleSubmit,
