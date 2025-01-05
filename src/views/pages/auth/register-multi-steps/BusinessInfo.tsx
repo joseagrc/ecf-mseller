@@ -2,18 +2,18 @@
 import { Controller, useFormContext } from 'react-hook-form'
 
 // MUI Imports
-import Grid from '@mui/material/Grid'
+import { Divider, MenuItem, Select } from '@mui/material'
 import Button from '@mui/material/Button'
+import FormControl from '@mui/material/FormControl'
+import Grid from '@mui/material/Grid'
+import InputAdornment from '@mui/material/InputAdornment'
+import InputLabel from '@mui/material/InputLabel'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import InputAdornment from '@mui/material/InputAdornment'
-import { Divider, MenuItem, Select } from '@mui/material'
 
 // Component Imports
-import DirectionalIcon from '@components/DirectionalIcon'
 import CustomAutocomplete from '@/components/customAutocomplete'
+import DirectionalIcon from '@components/DirectionalIcon'
 
 type StepPersonalInfoProps = {
   handleNext: () => void
@@ -71,8 +71,17 @@ const BusinessInfo = ({ handlePrev, activeStep, handleNext }: StepPersonalInfoPr
   const {
     control,
     watch,
-    formState: { errors }
+    formState: { errors, isValid, isDirty },
+    trigger
   } = useFormContext()
+
+  const handleNextClick = async () => {
+    const isValidForm = await trigger()
+
+    if (isValidForm) {
+      handleNext()
+    }
+  }
 
   const rnc = watch('rnc')
 
@@ -283,9 +292,9 @@ const BusinessInfo = ({ handlePrev, activeStep, handleNext }: StepPersonalInfoPr
             Anterior
           </Button>
           <Button
-            type='submit'
             variant='contained'
-            onClick={handleNext}
+            onClick={handleNextClick}
+            disabled={!isDirty || !isValid}
             endIcon={<DirectionalIcon ltrIconClass='ri-arrow-right-line' rtlIconClass='ri-arrow-left-line' />}
           >
             Siguiente

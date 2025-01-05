@@ -57,7 +57,8 @@ const StepAccountDetails = ({ activeStep, handleNext }: StepAccountDetailsProps)
   const {
     control,
     watch,
-    formState: { errors }
+    formState: { errors, isValid, isDirty },
+    trigger
   } = useFormContext()
 
   const password = watch('password')
@@ -68,6 +69,14 @@ const StepAccountDetails = ({ activeStep, handleNext }: StepAccountDetailsProps)
 
   const handleClickShowConfirmPassword = () => {
     setIsConfirmPasswordShown(!isConfirmPasswordShown)
+  }
+
+  const handleNextClick = async () => {
+    const isValidForm = await trigger()
+
+    if (isValidForm) {
+      handleNext()
+    }
   }
 
   return (
@@ -223,9 +232,9 @@ const StepAccountDetails = ({ activeStep, handleNext }: StepAccountDetailsProps)
             Anterior
           </Button>
           <Button
-            type='submit'
             variant='contained'
-            onClick={handleNext}
+            onClick={handleNextClick}
+            disabled={!isDirty || !isValid}
             endIcon={<DirectionalIcon ltrIconClass='ri-arrow-right-line' rtlIconClass='ri-arrow-left-line' />}
           >
             Siguiente
