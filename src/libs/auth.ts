@@ -89,7 +89,7 @@ export const authOptions: NextAuthOptions = {
       issuer: process.env.COGNITO_ISSUER,
       authorization: {
         params: {
-          scope: 'openid email profile aws.cognito.signin.user.admin',
+          scope: 'openid email profile',
           response_type: 'code'
         }
       }
@@ -113,7 +113,8 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt',
 
     // ** Seconds - How long until an idle session expires and is no longer valid
-    maxAge: 30 * 24 * 60 * 60 // ** 30 days
+    maxAge: 1 * 60 * 60, // ** 1 hour
+    updateAge: 30 * 24 * 60 * 60 // ** 30 days
   },
 
   // ** Please refer to https://next-auth.js.org/configuration/options#pages for more `pages` options
@@ -154,21 +155,15 @@ export const authOptions: NextAuthOptions = {
         token.accessToken = account.access_token
         token.idToken = account.id_token
         token.refreshToken = account.refresh_token
+        token.accessTokenExpires = Date.now() + account.expires_in * 1000
+        token.refreshTokenExpires = Date.now() + 30 * 24 * 60 * 60 * 1000 // ** 30 days
       }
 
-      if (account && profile) {
-        token.userProfile = {
-          givenName: profile.given_name,
-          familyName: profile.family_name,
-          email: profile.email,
-          rnc: profile['custom:rnc'],
-          businessName: profile['custom:businessName'],
-          plan: profile['custom:plan'],
-          verified: account.userStatus === 'CONFIRMED'
-        }
+      if (Date.now() < token.accessTokenExpires) {
+        return token
       }
 
-      return token
+      return refreshAccessToken(token)
     },
     async session({ session, token }) {
       if (session.user) {
@@ -190,6 +185,60 @@ export const authOptions: NextAuthOptions = {
   events: {
     signIn: async message => {
       console.log('NextAuth SignIn Event:', message)
+    }
+  }
+}
+
+async function refreshAccessToken(token: any) {
+  try {
+    const url = `${process.env.COGNITO_ISSUER}/oauth2/token`
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token: token.refreshToken,
+        client_id: process.env.COGNITO_CLIENT_ID!,
+        client_secret: process.env.COGNITO_CLIENT_SECRET!
+      })
+    })
+
+    console.log('response response response response ', response)
+
+    const refreshedTokens = await response.json()
+    console.log('response.status response.status response.status response.status ', response.status)
+    if (response.status === 401) {
+      return {
+        ...token,
+        error: 'RefreshAccessTokenError',
+        accessToken: null,
+        accessTokenExpires: 0,
+        idToken: null,
+        refreshToken: null,
+        userProfile: null
+      }
+    }
+
+    if (!response.ok) {
+      throw refreshedTokens
+    }
+
+    return {
+      ...token,
+      accessToken: refreshedTokens.access_token,
+      accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
+      idToken: refreshedTokens.id_token ?? token.idToken,
+      refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
+      userProfile: token.userProfile // ** Retain userProfile information
+    }
+  } catch (error) {
+    console.error('Error refreshing access token', error)
+    return {
+      ...token,
+      error: 'RefreshAccessTokenError',
+      errorMessage: error || 'The server did not understand the operation that was requested.'
     }
   }
 }
