@@ -138,7 +138,7 @@ export const authOptions: NextAuthOptions = {
 
       return true
     },
-    async jwt({ token, user, account, profile }: any) {
+    async jwt({ token, user, account }: any) {
       if (process.env.NODE_ENV === 'development') {
         console.log(token)
       }
@@ -208,7 +208,9 @@ async function refreshAccessToken(token: any) {
     console.log('response response response response ', response)
 
     const refreshedTokens = await response.json()
+
     console.log('response.status response.status response.status response.status ', response.status)
+
     if (response.status === 401) {
       return {
         ...token,
@@ -235,6 +237,7 @@ async function refreshAccessToken(token: any) {
     }
   } catch (error) {
     console.error('Error refreshing access token', error)
+
     return {
       ...token,
       error: 'RefreshAccessTokenError',

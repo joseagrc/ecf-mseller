@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 
 import { authOptions } from '@/libs/auth'
-import { ApiKeyInputType } from '@/types/ApiKeyTypes'
+import type { ApiKeyInputType } from '@/types/ApiKeyTypes'
 
 export async function GET() {
   try {

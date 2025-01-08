@@ -23,8 +23,11 @@ export const addApiKey = createAsyncThunk('apiKey/addApiKey', async (apiKey: Api
 
   if (response.ok) {
     const result = await response.json()
+
     await dispatch(getApiKeys())
-    return result
+
+    
+return result
   }
 })
 
@@ -61,8 +64,11 @@ export const deleteApiKey = createAsyncThunk('apiKey/deleteApiKey', async (apiKe
 
   if (response.ok) {
     const result = await response.json()
+
     await dispatch(getApiKeys())
-    return result
+
+    
+return result
   }
 })
 

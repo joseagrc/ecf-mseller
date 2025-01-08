@@ -1,9 +1,6 @@
 // React Imports
 
 // MUI Imports
-import { AppDispatch, RootState } from '@/redux-store'
-import { addApiKey, toggleDrawer } from '@/redux-store/slices/apiKeySlice'
-import { ApiKeyInputType } from '@/types/ApiKeyTypes'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 import Drawer from '@mui/material/Drawer'
@@ -19,10 +16,9 @@ import Typography from '@mui/material/Typography'
 import { Controller, useForm } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 
-type Props = {
-  open: boolean
-  handleClose: () => void
-}
+import type { AppDispatch, RootState } from '@/redux-store'
+import { addApiKey, toggleDrawer } from '@/redux-store/slices/apiKeySlice'
+import type { ApiKeyInputType } from '@/types/ApiKeyTypes'
 
 const AddApiKeyDrawer = () => {
   // Hooks

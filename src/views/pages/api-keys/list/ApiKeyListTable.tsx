@@ -32,6 +32,8 @@ import { toast } from 'react-toastify'
 
 import { useDispatch, useSelector } from 'react-redux'
 
+import { Typography } from '@mui/material'
+
 import type { ThemeColor } from '@core/types'
 
 // Component Imports
@@ -43,7 +45,6 @@ import LoadingWrapper from '@/components/LoadingWrapper'
 import type { AppDispatch, RootState } from '@/redux-store'
 import { deleteApiKey, getApiKeys, toggleDrawer } from '@/redux-store/slices/apiKeySlice'
 import tableStyles from '@core/styles/table.module.css'
-import { Typography } from '@mui/material'
 import AddApiKeyDrawer from './AddApiKeyDrawer'
 
 type ApiKey = {
