@@ -8,3 +8,16 @@ export interface ApiKeyType {
   stageKeys: string[]
   value: string
 }
+
+export interface ApiKeyInputType {
+  description: string
+  stage: 'TesteCF' | 'CerteCF' | 'eCF'
+}
+
+export interface ApiKeySliceType {
+  apiKeys: ApiKeyType[]
+  isLoading: boolean
+  error?: string | null
+  drawerData: ApiKeyInputType | null
+  isDrawerOpen: boolean
+}

@@ -9,6 +9,7 @@ import { VerticalNavProvider } from '@menu/contexts/verticalNavContext'
 
 // Util Imports
 import { NextAuthProvider } from '@/contexts/nextAuthProvider'
+import ReduxProvider from '@/redux-store/ReduxProvider'
 import { getMode, getSettingsFromCookie, getSystemMode } from '@core/utils/serverHelpers'
 
 type Props = ChildrenType & {
@@ -30,7 +31,7 @@ const Providers = (props: Props) => {
         <SettingsProvider settingsCookie={settingsCookie} mode={mode}>
           <ThemeProvider direction={direction} systemMode={systemMode}>
             <AppReactToastify direction={direction} hideProgressBar />
-            {children}
+            <ReduxProvider>{children}</ReduxProvider>
           </ThemeProvider>
         </SettingsProvider>
       </VerticalNavProvider>

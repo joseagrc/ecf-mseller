@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 
 import { authOptions } from '@/libs/auth'
+import { ApiKeyInputType } from '@/types/ApiKeyTypes'
 
 export async function GET() {
   try {
@@ -48,8 +49,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const data = await req.json()
-    const path = '/TesteCF/customer/apikeys'
+    const data = (await req.json()) as ApiKeyInputType
+    const path = `/${data.stage}/customer/apikey`
 
     const response = await fetch((process.env.AWS_API_GATEWAY_URL + path) as string, {
       method: 'POST',
@@ -57,7 +58,10 @@ export async function POST(req: NextRequest) {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${session.idToken}`
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify({
+        action: 'create',
+        description: data.description
+      })
     })
 
     if (!response.ok) {
@@ -85,7 +89,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     const data = await req.json()
-    const path = '/TesteCF/customer/apikeys'
+    const path = '/TesteCF/customer/apikey'
 
     const response = await fetch((process.env.AWS_API_GATEWAY_URL + path) as string, {
       method: 'DELETE',

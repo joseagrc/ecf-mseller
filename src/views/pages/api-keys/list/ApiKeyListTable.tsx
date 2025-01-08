@@ -1,5 +1,5 @@
 // React Imports
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 // Next Imports
 
@@ -30,6 +30,8 @@ import classnames from 'classnames'
 
 import { toast } from 'react-toastify'
 
+import { useDispatch, useSelector } from 'react-redux'
+
 import type { ThemeColor } from '@core/types'
 
 // Component Imports
@@ -37,8 +39,12 @@ import type { ThemeColor } from '@core/types'
 // Util Imports
 
 // Style Imports
-import type { ApiKeyType } from '@/types/ApiKeyTypes'
+import LoadingWrapper from '@/components/LoadingWrapper'
+import type { AppDispatch, RootState } from '@/redux-store'
+import { deleteApiKey, getApiKeys, toggleDrawer } from '@/redux-store/slices/apiKeySlice'
 import tableStyles from '@core/styles/table.module.css'
+import { Typography } from '@mui/material'
+import AddApiKeyDrawer from './AddApiKeyDrawer'
 
 type ApiKey = {
   description: string
@@ -83,11 +89,7 @@ export const statusChipColor: { [key: string]: StatusChipColorType } = {
 
 const fuzzyFilter: FilterFn<any> = (): any => {}
 
-const handleDelete = (id: string) => {
-  console.log(id)
-}
-
-const columns: ColumnDef<ApiKey>[] = [
+const columns = (handleDelete: (apiKeyId: string) => void): ColumnDef<ApiKey>[] => [
   {
     accessorKey: 'description',
     header: 'Descripción',
@@ -141,15 +143,30 @@ const columns: ColumnDef<ApiKey>[] = [
   }
 ]
 
-const OrderListTable = ({ apiKeyData }: { apiKeyData?: ApiKeyType[] }) => {
+const ApiKeyListTable = () => {
   // States
   const [rowSelection, setRowSelection] = useState({})
-  const [data, setData] = useState(...[apiKeyData])
   const [globalFilter, setGlobalFilter] = useState('')
+  const dispatch = useDispatch<AppDispatch>()
+  const apiKeyStore = useSelector((state: RootState) => state.apiKeyReducer)
+
+  useEffect(() => {
+    dispatch(getApiKeys())
+  }, [dispatch])
+
+  const handleDelete = (apiKeyId: string) => {
+    if (window.confirm('Seguro que deseas eliminar esta API key?')) {
+      dispatch(deleteApiKey(apiKeyId))
+    }
+  }
+
+  const handleDrawer = () => {
+    dispatch(toggleDrawer(null))
+  }
 
   const table = useReactTable({
-    data: apiKeyData as ApiKeyType[],
-    columns,
+    data: apiKeyStore.apiKeys,
+    columns: columns(handleDelete),
     filterFns: {
       fuzzy: fuzzyFilter
     },
@@ -177,84 +194,89 @@ const OrderListTable = ({ apiKeyData }: { apiKeyData?: ApiKeyType[] }) => {
   })
 
   return (
-    <Card>
-      <CardContent className='flex justify-between max-sm:flex-col sm:items-center gap-4'>
-        <Button variant='outlined' color='secondary' startIcon={<i className='ri-upload-2-line' />}>
-          Export
-        </Button>
-      </CardContent>
-      <div className='overflow-x-auto'>
-        <table className={tableStyles.table}>
-          <thead>
-            {table.getHeaderGroups().map(headerGroup => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <th key={header.id}>
-                    {header.isPlaceholder ? null : (
-                      <>
-                        <div
-                          className={classnames({
-                            'flex items-center': header.column.getIsSorted(),
-                            'cursor-pointer select-none': header.column.getCanSort()
-                          })}
-                          onClick={header.column.getToggleSortingHandler()}
-                        >
-                          {flexRender(header.column.columnDef.header, header.getContext())}
-                          {{
-                            asc: <i className='ri-arrow-up-s-line text-xl' />,
-                            desc: <i className='ri-arrow-down-s-line text-xl' />
-                          }[header.column.getIsSorted() as 'asc' | 'desc'] ?? null}
-                        </div>
-                      </>
-                    )}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          {table.getFilteredRowModel().rows.length === 0 ? (
-            <tbody>
-              <tr>
-                <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
-                  No data available
-                </td>
-              </tr>
-            </tbody>
-          ) : (
-            <tbody>
-              {table
-                .getRowModel()
-                .rows.slice(0, table.getState().pagination.pageSize)
-                .map(row => {
-                  return (
-                    <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
-                      {row.getVisibleCells().map(cell => (
-                        <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-                      ))}
-                    </tr>
-                  )
-                })}
-            </tbody>
-          )}
-        </table>
-      </div>
-      <TablePagination
-        rowsPerPageOptions={[10, 25, 50, 100]}
-        component='div'
-        className='border-bs'
-        count={table.getFilteredRowModel().rows.length}
-        rowsPerPage={table.getState().pagination.pageSize}
-        page={table.getState().pagination.pageIndex}
-        SelectProps={{
-          inputProps: { 'aria-label': 'rows per page' }
-        }}
-        onPageChange={(_, page) => {
-          table.setPageIndex(page)
-        }}
-        onRowsPerPageChange={e => table.setPageSize(Number(e.target.value))}
-      />
-    </Card>
+    <>
+      <AddApiKeyDrawer />
+      <Card>
+        <CardContent className='flex justify-between max-sm:flex-col sm:items-center gap-4'>
+          <Typography variant='h5'>Api Keys</Typography>
+          <Button variant='contained' color='primary' startIcon={<i className='ri-add-fill' />} onClick={handleDrawer}>
+            Crear Key
+          </Button>
+        </CardContent>
+        <div className='overflow-x-auto'>
+          <table className={tableStyles.table}>
+            <thead>
+              {table.getHeaderGroups().map(headerGroup => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map(header => (
+                    <th key={header.id}>
+                      {header.isPlaceholder ? null : (
+                        <>
+                          <div
+                            className={classnames({
+                              'flex items-center': header.column.getIsSorted(),
+                              'cursor-pointer select-none': header.column.getCanSort()
+                            })}
+                            onClick={header.column.getToggleSortingHandler()}
+                          >
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                            {{
+                              asc: <i className='ri-arrow-up-s-line text-xl' />,
+                              desc: <i className='ri-arrow-down-s-line text-xl' />
+                            }[header.column.getIsSorted() as 'asc' | 'desc'] ?? null}
+                          </div>
+                        </>
+                      )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+
+            {table.getFilteredRowModel().rows.length === 0 ? (
+              <tbody>
+                <tr>
+                  <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
+                    <LoadingWrapper isLoading={apiKeyStore.isLoading}>No hay datos disponibles.</LoadingWrapper>
+                  </td>
+                </tr>
+              </tbody>
+            ) : (
+              <tbody>
+                {table
+                  .getRowModel()
+                  .rows.slice(0, table.getState().pagination.pageSize)
+                  .map(row => {
+                    return (
+                      <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
+                        {row.getVisibleCells().map(cell => (
+                          <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                        ))}
+                      </tr>
+                    )
+                  })}
+              </tbody>
+            )}
+          </table>
+        </div>
+        <TablePagination
+          rowsPerPageOptions={[10, 25, 50, 100]}
+          component='div'
+          className='border-bs'
+          count={table.getFilteredRowModel().rows.length}
+          rowsPerPage={table.getState().pagination.pageSize}
+          page={table.getState().pagination.pageIndex}
+          SelectProps={{
+            inputProps: { 'aria-label': 'rows per page' }
+          }}
+          onPageChange={(_, page) => {
+            table.setPageIndex(page)
+          }}
+          onRowsPerPageChange={e => table.setPageSize(Number(e.target.value))}
+        />
+      </Card>
+    </>
   )
 }
 
-export default OrderListTable
+export default ApiKeyListTable
