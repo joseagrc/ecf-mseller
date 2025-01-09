@@ -3,10 +3,12 @@ import { configureStore } from '@reduxjs/toolkit'
 
 // Slice Imports
 import apiKeyReducer from '@/redux-store/slices/apiKeySlice'
+import documentReducer from '@/redux-store/slices/documentSlice'
 
 export const store = configureStore({
   reducer: {
-    apiKeyReducer
+    apiKeyReducer,
+    documentReducer
   },
   middleware: getDefaultMiddleware => getDefaultMiddleware({ serializableCheck: false })
 })

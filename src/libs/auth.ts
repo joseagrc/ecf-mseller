@@ -1,3 +1,4 @@
+import { jwtDecode } from 'jwt-decode' // Import jwt-decode library
 import type { NextAuthOptions, Profile as NextAuthProfile } from 'next-auth'
 import NextAuth from 'next-auth'
 import CognitoProvider from 'next-auth/providers/cognito'
@@ -141,36 +142,56 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account }: any) {
       if (process.env.NODE_ENV === 'development') {
         console.log(token)
+        console.log(user)
+        console.log(account)
       }
 
       if (user) {
-        /*
-         * For adding custom parameters to user in session, we first need to add those parameters
-         * in token which then will be available in the `session()` callback
-         */
-        token.name = user.name
+        token.name = user.name // Ensure name is set from user
       }
 
+      //account is define when user is logged in one time
       if (account) {
         token.accessToken = account.access_token
         token.idToken = account.id_token
         token.refreshToken = account.refresh_token
         token.accessTokenExpires = Date.now() + account.expires_in * 1000
         token.refreshTokenExpires = Date.now() + 30 * 24 * 60 * 60 * 1000 // ** 30 days
+
+        // Decode idToken to get user information
+        const decodedIdToken: any = jwtDecode(account.id_token)
+
+        token.userProfile = {
+          givenName: decodedIdToken.given_name,
+          familyName: decodedIdToken.family_name,
+          email: decodedIdToken.email,
+          rnc: decodedIdToken['custom:rnc'],
+          businessName: decodedIdToken['custom:businessName'],
+          plan: decodedIdToken['custom:plan'],
+          verified: decodedIdToken.email_verified
+        }
       }
 
       if (Date.now() < token.accessTokenExpires) {
         return token
       }
 
-      return refreshAccessToken(token)
+      return token
+
+      //TODO: Uncomment this line to refresh the access token
+      //return refreshAccessToken(token)
+      // Error refreshing access token {
+      //   code: 'BadRequest',
+      //   message: 'The server did not understand the operation that was requested.',
+      //   type: 'client'
+      // }
     },
     async session({ session, token }) {
       if (session.user) {
-        // ** Add custom params to user in session which are added in `jwt()` callback via `token` parameter
-        session.user.name = token.name
+        session.user.name = token.name // Ensure name is set from token
       }
 
+      console.log('Session Callback:', session, token)
       session.accessToken = token.accessToken as string
       session.idToken = token.idToken as string
       session.refreshToken = token.refreshToken as string
@@ -189,29 +210,37 @@ export const authOptions: NextAuthOptions = {
   }
 }
 
-async function refreshAccessToken(token: any) {
+export async function refreshAccessToken(token: any) {
   try {
     const url = `${process.env.COGNITO_ISSUER}/oauth2/token`
+    const body = new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: token.refreshToken,
+      client_id: process.env.COGNITO_CLIENT_ID!,
+      client_secret: process.env.COGNITO_CLIENT_SECRET!
+    })
+
+    console.log('Client ID:', process.env.COGNITO_CLIENT_ID)
+    console.log('Client Secret:', process.env.COGNITO_CLIENT_SECRET)
+
+    console.log('Request URL:', url)
+    console.log('Request Body:', body.toString())
+
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      body: new URLSearchParams({
-        grant_type: 'refresh_token',
-        refresh_token: token.refreshToken,
-        client_id: process.env.COGNITO_CLIENT_ID!,
-        client_secret: process.env.COGNITO_CLIENT_SECRET!
-      })
+      body
     })
 
-    console.log('response response response response ', response)
+    console.log('refreshAccessToken Response:', token)
 
     const refreshedTokens = await response.json()
 
-    console.log('response.status response.status response.status response.status ', response.status)
-
     if (response.status === 401) {
+      console.error('BadRequest or Unauthorized error:', refreshedTokens)
+
       return {
         ...token,
         error: 'RefreshAccessTokenError',
@@ -241,6 +270,7 @@ async function refreshAccessToken(token: any) {
     return {
       ...token,
       error: 'RefreshAccessTokenError',
+
       errorMessage: error || 'The server did not understand the operation that was requested.'
     }
   }

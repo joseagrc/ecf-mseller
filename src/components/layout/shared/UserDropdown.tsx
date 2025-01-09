@@ -1,27 +1,27 @@
 'use client'
 
 // React Imports
-import { useRef, useState } from 'react'
 import type { MouseEvent } from 'react'
+import { useRef, useState } from 'react'
 
 // Next Imports
 import { useRouter } from 'next/navigation'
 
-import { signOut } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 
 // MUI Imports
-import { styled } from '@mui/material/styles'
-import Badge from '@mui/material/Badge'
 import Avatar from '@mui/material/Avatar'
-import Popper from '@mui/material/Popper'
-import Fade from '@mui/material/Fade'
-import Paper from '@mui/material/Paper'
-import ClickAwayListener from '@mui/material/ClickAwayListener'
-import MenuList from '@mui/material/MenuList'
-import Typography from '@mui/material/Typography'
-import Divider from '@mui/material/Divider'
-import MenuItem from '@mui/material/MenuItem'
+import Badge from '@mui/material/Badge'
 import Button from '@mui/material/Button'
+import ClickAwayListener from '@mui/material/ClickAwayListener'
+import Divider from '@mui/material/Divider'
+import Fade from '@mui/material/Fade'
+import MenuItem from '@mui/material/MenuItem'
+import MenuList from '@mui/material/MenuList'
+import Paper from '@mui/material/Paper'
+import Popper from '@mui/material/Popper'
+import { styled } from '@mui/material/styles'
+import Typography from '@mui/material/Typography'
 
 // Hook Imports
 import { useSettings } from '@core/hooks/useSettings'
@@ -63,7 +63,9 @@ const UserDropdown = () => {
 
     setOpen(false)
   }
+  const session = useSession() as any
 
+  console.log('sessionsessionsessionsessionsession', session)
   const handleUserLogout = async () => {
     await signOut({ callbackUrl: '/login' })
   }
@@ -104,31 +106,32 @@ const UserDropdown = () => {
               <ClickAwayListener onClickAway={e => handleDropdownClose(e as MouseEvent | TouchEvent)}>
                 <MenuList>
                   <div className='flex items-center plb-2 pli-4 gap-2' tabIndex={-1}>
-                    <Avatar alt='John Doe' src='/images/avatars/1.png' />
+                    <Avatar alt='Usuario' src='/images/avatars/1.png' />
                     <div className='flex items-start flex-col'>
                       <Typography className='font-medium' color='text.primary'>
-                        John Doe
+                        {session.data?.user?.given_name || ''} {session.data?.user?.family_name || ''}
                       </Typography>
-                      <Typography variant='caption'>admin@materio.com</Typography>
+                      <Typography variant='caption'>{session.data.user.email}</Typography>
+                      <Typography variant='caption'>RNC:{session.data.user.rnc}</Typography>
                     </div>
                   </div>
                   <Divider className='mlb-1' />
                   <MenuItem className='gap-3' onClick={e => handleDropdownClose(e)}>
                     <i className='ri-user-3-line' />
-                    <Typography color='text.primary'>My Profile</Typography>
+                    <Typography color='text.primary'>Mi cuenta</Typography>
                   </MenuItem>
                   <MenuItem className='gap-3' onClick={e => handleDropdownClose(e)}>
                     <i className='ri-settings-4-line' />
-                    <Typography color='text.primary'>Settings</Typography>
+                    <Typography color='text.primary'>Configuración</Typography>
                   </MenuItem>
                   <MenuItem className='gap-3' onClick={e => handleDropdownClose(e)}>
                     <i className='ri-money-dollar-circle-line' />
-                    <Typography color='text.primary'>Pricing</Typography>
+                    <Typography color='text.primary'>Plan: {session.data.user.plan}</Typography>
                   </MenuItem>
-                  <MenuItem className='gap-3' onClick={e => handleDropdownClose(e)}>
+                  {/* <MenuItem className='gap-3' onClick={e => handleDropdownClose(e)}>
                     <i className='ri-question-line' />
                     <Typography color='text.primary'>FAQ</Typography>
-                  </MenuItem>
+                  </MenuItem> */}
                   <div className='flex items-center plb-2 pli-4'>
                     <Button
                       fullWidth
@@ -139,7 +142,7 @@ const UserDropdown = () => {
                       onClick={handleUserLogout}
                       sx={{ '& .MuiButton-endIcon': { marginInlineStart: 1.5 } }}
                     >
-                      Logout
+                      Cerrar Sesión
                     </Button>
                   </div>
                 </MenuList>
