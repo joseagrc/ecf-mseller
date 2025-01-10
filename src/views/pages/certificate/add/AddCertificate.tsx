@@ -4,18 +4,12 @@
 import { useState } from 'react'
 
 // MUI Imports
-import type { BoxProps } from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import CardHeader from '@mui/material/CardHeader'
 import IconButton from '@mui/material/IconButton'
-import Link from '@mui/material/Link'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import { styled } from '@mui/material/styles'
 
 // Third-party Imports
 import { useDropzone } from 'react-dropzone'
@@ -23,10 +17,12 @@ import { useDropzone } from 'react-dropzone'
 // Component Imports
 import { toast } from 'react-toastify'
 
+import { Link, styled, type BoxProps } from '@mui/material'
+
+import AppReactDropzone from '@/libs/styles/AppReactDropzone'
 import CustomAvatar from '@core/components/mui/Avatar'
 
 // Styled Component Imports
-import AppReactDropzone from '@/libs/styles/AppReactDropzone'
 
 type FileProp = {
   name: string
@@ -34,7 +30,6 @@ type FileProp = {
   size: number
 }
 
-// Styled Dropzone Component
 const Dropzone = styled(AppReactDropzone)<BoxProps>(({ theme }) => ({
   '& .dropzone': {
     minHeight: 'unset',
@@ -48,7 +43,10 @@ const Dropzone = styled(AppReactDropzone)<BoxProps>(({ theme }) => ({
   }
 }))
 
-const AddCertificate = () => {
+interface AddCertificateProps {
+  callback?: () => void
+}
+const AddCertificate = (props: AddCertificateProps) => {
   const [files, setFiles] = useState<File[]>([])
   const [error, setError] = useState<string>('')
   const [password, setPassword] = useState<string>('')
@@ -121,6 +119,8 @@ const AddCertificate = () => {
 
       toast.success('Certificado agregado exitosamente')
       handleRemoveFile()
+
+      if (props.callback) props.callback()
     } catch (err: any) {
       setError(err?.message)
       toast.error('Error al agregar el certificado')
@@ -158,55 +158,46 @@ const AddCertificate = () => {
   ))
 
   return (
-    <Dropzone>
-      <Card>
-        <CardHeader title='Cargar Certificado' sx={{ '& .MuiCardHeader-action': { alignSelf: 'center' } }} />
-        <CardContent>
-          <Typography variant='body2' color='text.secondary' sx={{ mb: 4 }}>
-            Si no posee un certificado digital válido, puede solicitarlo en línea a través de{' '}
-            <Link
-              href='https://www.camarasantodomingo.do/solicitudes/FormularioWeb/'
-              target='_blank'
-              rel='noopener noreferrer'
-            >
-              Cámara de Comercio de Santo Domingo
-            </Link>
-          </Typography>
-
-          <div {...getRootProps({ className: 'dropzone' })}>
-            <input {...getInputProps()} />
-            <div className='flex items-center flex-col gap-2 text-center'>
-              <CustomAvatar variant='rounded' skin='light' color='secondary'>
-                <i className='ri-upload-2-line' />
-              </CustomAvatar>
-              <Typography variant='h4'>Arrastre su certificado .p12 aquí</Typography>
-              <Typography color='text.disabled'>ó</Typography>
-              <Button variant='outlined' size='small'>
-                Buscar Certificado
+    <>
+      <Dropzone>
+        <div {...getRootProps({ className: 'dropzone' })}>
+          <input {...getInputProps()} />
+          <div className='flex items-center flex-col gap-2 text-center'>
+            <CustomAvatar variant='rounded' skin='light' color='secondary'>
+              <i className='ri-upload-2-line' />
+            </CustomAvatar>
+            <Typography variant='h4'>Arrastre su certificado .p12 aquí</Typography>
+            <Typography color='text.disabled'>ó</Typography>
+            <Button variant='outlined' size='small'>
+              Buscar Certificado
+            </Button>
+          </div>
+        </div>
+        {files.length ? (
+          <>
+            <List>{fileList}</List>
+            <div className='buttons'>
+              <Button variant='contained' onClick={handleSubmit} disabled={!password || loading}>
+                {loading ? 'Procesando...' : 'Subir Certificado'}
               </Button>
             </div>
-          </div>
-          {files.length ? (
-            <>
-              <List>{fileList}</List>
-              <div className='buttons'>
-                <Button color='error' variant='outlined'>
-                  Remove All
-                </Button>
-                <Button variant='contained' onClick={handleSubmit} disabled={!password || loading}>
-                  {loading ? 'Procesando...' : 'Subir Certificado'}
-                </Button>
-              </div>
-            </>
-          ) : null}
-          {error && (
-            <Typography color='error' variant='body2'>
-              {error}
-            </Typography>
-          )}
-        </CardContent>
-      </Card>
-    </Dropzone>
+          </>
+        ) : null}
+        {error && (
+          <Typography color='error' variant='body2'>
+            {error}
+          </Typography>
+        )}
+      </Dropzone>
+      <Typography variant='body2' color='text.secondary' sx={{ mt: 4 }}>
+        Nota: Su certificado digital se alojará en un almacenamiento seguro e encriptado y no se compartirá con
+        terceros, al igual que la contraseña de su certificado digital será guardada utilizando el mecanismo de
+        inscripción de la plataforma.{' '}
+        <Link href='https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingKMSEncryption.html' target='_blank'>
+          Leer Más
+        </Link>
+      </Typography>
+    </>
   )
 }
 

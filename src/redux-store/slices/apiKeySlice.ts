@@ -3,6 +3,7 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
 import type { ApiKeyInputType, ApiKeySliceType, ApiKeyType } from '@/types/ApiKeyTypes'
+import { toast } from 'react-toastify'
 
 const initialState: ApiKeySliceType = {
   apiKeys: [],
@@ -23,11 +24,10 @@ export const addApiKey = createAsyncThunk('apiKey/addApiKey', async (apiKey: Api
 
   if (response.ok) {
     const result = await response.json()
-
+    toast.success('API Key agregada exitosamente')
     await dispatch(getApiKeys())
 
-    
-return result
+    return result
   }
 })
 
@@ -67,8 +67,7 @@ export const deleteApiKey = createAsyncThunk('apiKey/deleteApiKey', async (apiKe
 
     await dispatch(getApiKeys())
 
-    
-return result
+    return result
   }
 })
 

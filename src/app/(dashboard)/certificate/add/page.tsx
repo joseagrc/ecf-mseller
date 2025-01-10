@@ -1,7 +1,7 @@
 // MUI Imports
 import Grid from '@mui/material/Grid'
 
-import AddCertificate from '@/views/pages/certificate/add/AddCertificate'
+import AddCertificate from '@/views/pages/certificate/add'
 
 const eCommerceProductsAdd = () => {
   return (
