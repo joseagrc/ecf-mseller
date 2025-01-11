@@ -109,7 +109,7 @@ const UserDropdown = () => {
                     <Avatar alt='Usuario' src='/images/avatars/1.png' />
                     <div className='flex items-start flex-col'>
                       <Typography className='font-medium' color='text.primary'>
-                        {session.data?.user?.given_name || ''} {session.data?.user?.family_name || ''}
+                        {session.data?.user?.given_name || ''} {session.data?.user.name || ''}
                       </Typography>
                       <Typography variant='caption'>{session.data.user.email}</Typography>
                       <Typography variant='caption'>RNC:{session.data.user.rnc}</Typography>

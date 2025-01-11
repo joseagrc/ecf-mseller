@@ -98,8 +98,6 @@ const DocumentListTable = () => {
   const params = {
     documentType: 'Factura de Crédito Fiscal Electrónico',
     status: 'Error',
-    fromDate: Date.now() - 30 * 24 * 60 * 60 * 1000, // last 30 days
-    toDate: Date.now(),
     limit: pageSize
   }
 
@@ -249,7 +247,7 @@ const DocumentListTable = () => {
               ))}
             </thead>
 
-            {table.getFilteredRowModel().rows.length === 0 ? (
+            {table?.getFilteredRowModel().rows.length === 0 ? (
               <tbody>
                 <tr>
                   <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>

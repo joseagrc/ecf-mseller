@@ -13,22 +13,46 @@
  */
 import { useEffect, useState } from 'react'
 
+import { Button } from '@mui/material'
 import Box from '@mui/material/Box'
+import Grid from '@mui/material/Grid'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
+import TextField from '@mui/material/TextField'
 import { useSession } from 'next-auth/react'
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { Prism } from 'react-syntax-highlighter'
 import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
-const makeApiRequest = async (rncEmisor, razonSocialEmisor, direccionEmisor, fechaEmision) => {
-  const host = 'https://ecf.api.mseller.app' // Reemplazar con la URL del entorno
+const SyntaxHighlighter = Prism as any
+
+interface MakeApiRequestProps {
+  rncEmisor: string
+  razonSocialEmisor: string
+  direccionEmisor: string
+  fechaEmision: string
+  apiKey: string
+  email: string
+  password: string
+  eNCF: string
+}
+const makeApiRequest = async ({
+  rncEmisor,
+  razonSocialEmisor,
+  direccionEmisor,
+  fechaEmision,
+  apiKey,
+  email,
+  password,
+  eNCF
+}: MakeApiRequestProps) => {
+  const host = 'https://j8modo6at8.execute-api.us-east-1.amazonaws.com/TesteCF' //'https://ecf.api.mseller.app' // Reemplazar con la URL del entorno
   const loginUrl = `${host}/customer/authentication`
   const apiUrl = `${host}/documentos-ecf`
 
   // Datos de inicio de sesión
   const loginData = {
-    email: 'user@example.com',
-    password: 'password123'
+    email: email,
+    password: password
   }
 
   try {
@@ -54,7 +78,7 @@ const makeApiRequest = async (rncEmisor, razonSocialEmisor, direccionEmisor, fec
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${idToken}`,
-        'x-api-key': 'your-api-key' // Reemplazar con la x-api-key correspondiente
+        'x-api-key': apiKey // Reemplazar con la x-api-key correspondiente
       },
       body: JSON.stringify({
         ECF: {
@@ -62,7 +86,7 @@ const makeApiRequest = async (rncEmisor, razonSocialEmisor, direccionEmisor, fec
             Version: '1.0',
             IdDoc: {
               TipoeCF: '31',
-              eNCF: 'E310435300215',
+              eNCF: eNCF,
               FechaVencimientoSecuencia: '31-12-2026',
               IndicadorEnvioDiferido: '1',
               IndicadorMontoGravado: '0',
@@ -145,20 +169,25 @@ const makeApiRequest = async (rncEmisor, razonSocialEmisor, direccionEmisor, fec
 
 export const CodeExamples = () => {
   const [value, setValue] = useState(0)
-  const session = useSession()
+  const session = useSession() as any
 
-  const [rncEmisor, setRncEmisor] = useState('130359334')
-  const [razonSocialEmisor, setRazonSocialEmisor] = useState('GARGON SRL')
+  const [rncEmisor, setRncEmisor] = useState('12345678')
+  const [razonSocialEmisor, setRazonSocialEmisor] = useState('Tu Negocio')
   const [direccionEmisor, setDireccionEmisor] = useState('DireccionEmisor1')
   const [fechaEmision, setFechaEmision] = useState('16-12-2024')
+  const [apiKey, setApiKey] = useState('your-api-key')
+  const [email, setEmail] = useState('user@example.com')
+  const [password, setPassword] = useState('')
+  const [eNCF, setENCF] = useState('E310435300215')
 
   useEffect(() => {
     if (session.data) {
-      setRncEmisor(session.data?.user.rnc)
-      setRazonSocialEmisor(session.data?.razonSocial)
-      setDireccionEmisor(session.data?.direccion)
+      setRncEmisor(session.data?.user.rnc || '130359334')
+      setRazonSocialEmisor(session.data?.razonSocial || 'Tu Negocio')
+      setEmail(session.data?.user?.email || 'Tu correo electrónico')
+      setDireccionEmisor(session.data?.direccion || 'DireccionEmisor1')
     }
-  }, [])
+  }, [session.data])
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue)
@@ -166,22 +195,95 @@ export const CodeExamples = () => {
 
   return (
     <Box sx={{ width: '100%' }}>
+      <Button
+        variant='contained'
+        onClick={() =>
+          makeApiRequest({ rncEmisor, razonSocialEmisor, direccionEmisor, fechaEmision, apiKey, email, password, eNCF })
+        }
+      >
+        Probar conexión
+      </Button>
       <Tabs value={value} onChange={handleChange} aria-label='code examples'>
         <Tab label='JavaScript' />
         <Tab label='C#' />
         <Tab label='cURL' />
       </Tabs>
+      <Box sx={{ p: 3 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={6}>
+            <TextField
+              label='RNC Emisor'
+              value={rncEmisor}
+              onChange={e => setRncEmisor(e.target.value)}
+              fullWidth
+              margin='normal'
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              label='Razon Social Emisor'
+              value={razonSocialEmisor}
+              onChange={e => setRazonSocialEmisor(e.target.value)}
+              fullWidth
+              margin='normal'
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              label='Direccion Emisor'
+              value={direccionEmisor}
+              onChange={e => setDireccionEmisor(e.target.value)}
+              fullWidth
+              margin='normal'
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              label='Fecha Emision'
+              value={fechaEmision}
+              onChange={e => setFechaEmision(e.target.value)}
+              fullWidth
+              margin='normal'
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              label='API Key'
+              value={apiKey}
+              onChange={e => setApiKey(e.target.value)}
+              fullWidth
+              margin='normal'
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField label='Email' value={email} onChange={e => setEmail(e.target.value)} fullWidth margin='normal' />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              label='Password'
+              type='password'
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              fullWidth
+              margin='normal'
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField label='eNCF' value={eNCF} onChange={e => setENCF(e.target.value)} fullWidth margin='normal' />
+          </Grid>
+        </Grid>
+      </Box>
       {value === 0 && (
         <Box sx={{ p: 3 }}>
           <SyntaxHighlighter language='javascript' style={materialDark}>
-            {`const makeApiRequest = async (rncEmisor, razonSocialEmisor, direccionEmisor, fechaEmision) => {
+            {`const makeApiRequest = async (rncEmisor, razonSocialEmisor, direccionEmisor, fechaEmision, apiKey, email, password, eNCF) => {
   const host = 'https://ecf.api.mseller.app';
   const loginUrl = \`\${host}/customer/authentication\`;
   const apiUrl = \`\${host}/documentos-ecf\`;
 
   const loginData = {
-    email: 'user@example.com',
-    password: 'password123'
+    email: email,
+    password: password
   };
 
   try {
@@ -205,7 +307,7 @@ export const CodeExamples = () => {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': \`Bearer \${idToken}\`,
-        'x-api-key': 'your-api-key'
+        'x-api-key': apiKey
       },
       body: JSON.stringify({
         "ECF": {
@@ -213,7 +315,7 @@ export const CodeExamples = () => {
             "Version": "1.0",
             "IdDoc": {
               "TipoeCF": "31",
-              "eNCF": "E310435300215",
+              "eNCF": eNCF,
               "FechaVencimientoSecuencia": "31-12-2026",
               "IndicadorEnvioDiferido": "1",
               "IndicadorMontoGravado": "0",
@@ -308,7 +410,7 @@ public class ApiClient
 {
     private static readonly HttpClient client = new HttpClient();
 
-    public static async Task MakeApiRequest(string rncEmisor, string razonSocialEmisor, string direccionEmisor, string fechaEmision)
+    public static async Task MakeApiRequest(string rncEmisor, string razonSocialEmisor, string direccionEmisor, string fechaEmision, string apiKey, string email, string password, string eNCF)
     {
         var host = "https://ecf.api.mseller.app";
         var loginUrl = $"{host}/customer/authentication";
@@ -316,8 +418,8 @@ public class ApiClient
 
         var loginData = new
         {
-            email = "user@example.com",
-            password = "password123"
+            email = email,
+            password = password
         };
 
         try
@@ -334,7 +436,7 @@ public class ApiClient
             var idToken = loginResult.idToken;
 
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", idToken);
-            client.DefaultRequestHeaders.Add("x-api-key", "your-api-key");
+            client.DefaultRequestHeaders.Add("x-api-key", apiKey);
 
             var apiContent = new StringContent(JsonConvert.SerializeObject(new
             {
@@ -346,7 +448,7 @@ public class ApiClient
                         IdDoc = new
                         {
                             TipoeCF = "31",
-                            eNCF = "E310435300215",
+                            eNCF = eNCF,
                             FechaVencimientoSecuencia = "31-12-2026",
                             IndicadorEnvioDiferido = "1",
                             IndicadorMontoGravado = "0",
@@ -449,8 +551,8 @@ login_url="\${host}/customer/authentication"
 api_url="\${host}/documentos-ecf"
 
 login_data='{
-  "email": "user@example.com",
-  "password": "password123"
+  "email": "'${email}'",
+  "password": "'${password}'"
 }'
 
 login_response=$(curl -s -X POST -H "Content-Type: application/json" -d "\${login_data}" "\${login_url}")
@@ -462,7 +564,7 @@ api_data='{
       "Version": "1.0",
       "IdDoc": {
         "TipoeCF": "31",
-        "eNCF": "E310435300215",
+        "eNCF": "'${eNCF}'",
         "FechaVencimientoSecuencia": "31-12-2026",
         "IndicadorEnvioDiferido": "1",
         "IndicadorMontoGravado": "0",
@@ -530,7 +632,7 @@ api_data='{
   }
 }'
 
-api_response=$(curl -s -X POST -H "Content-Type: application/json" -H "Authorization: Bearer \${id_token}" -H "x-api-key: your-api-key" -d "\${api_data}" "\${api_url}")
+api_response=$(curl -s -X POST -H "Content-Type: application/json" -H "Authorization: Bearer \${id_token}" -H "x-api-key: \${apiKey}" -d "\${api_data}" "\${api_url}")
 
 echo "Respuesta de la API: \${api_response}"`}
           </SyntaxHighlighter>

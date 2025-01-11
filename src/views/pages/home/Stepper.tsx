@@ -12,7 +12,7 @@ import CardHeader from '@mui/material/CardHeader'
 import Step from '@mui/material/Step'
 import StepContent from '@mui/material/StepContent'
 import StepLabel from '@mui/material/StepLabel'
-import Stepper from '@mui/material/Stepper'
+import { default as StepperMui } from '@mui/material/Stepper'
 import Typography from '@mui/material/Typography'
 
 // Third-party Imports
@@ -28,7 +28,7 @@ import { CodeExamples } from './CodeExamples'
 
 // Vars
 
-const StepperVerticalWithNumbers = () => {
+const Stepper = () => {
   // States
   const [activeStep, setActiveStep] = useState(0)
 
@@ -75,7 +75,7 @@ const StepperVerticalWithNumbers = () => {
       <CardHeader title='Siga los siguientes pasos para iniciar las pruebas y certificación' />
       <CardContent>
         <StepperWrapper>
-          <Stepper activeStep={activeStep} orientation='vertical'>
+          <StepperMui activeStep={activeStep} orientation='vertical'>
             {steps.map((step, index) => (
               <Step key={index} className={classNames({ active: activeStep === index })}>
                 <StepLabel StepIconComponent={StepperCustomDot}>
@@ -110,7 +110,7 @@ const StepperVerticalWithNumbers = () => {
                 </StepContent>
               </Step>
             ))}
-          </Stepper>
+          </StepperMui>
         </StepperWrapper>
         {activeStep === steps.length && (
           <div className='mt-2'>
@@ -124,4 +124,5 @@ const StepperVerticalWithNumbers = () => {
     </Card>
   )
 }
-export default StepperVerticalWithNumbers
+
+export default Stepper

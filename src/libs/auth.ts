@@ -1,8 +1,15 @@
+import {
+  AuthFlowType,
+  CognitoIdentityProviderClient,
+  GetUserCommand,
+  InitiateAuthCommand
+} from '@aws-sdk/client-cognito-identity-provider'
 import { jwtDecode } from 'jwt-decode' // Import jwt-decode library
 import type { NextAuthOptions, Profile as NextAuthProfile } from 'next-auth'
-import NextAuth from 'next-auth'
 import CognitoProvider from 'next-auth/providers/cognito'
 import CredentialProvider from 'next-auth/providers/credentials'
+
+import { calculateSecretHash } from '@/utils/calculateSecretHash'
 
 export interface UserProfile {
   givenName: string
@@ -22,10 +29,93 @@ declare module 'next-auth' {
   }
 }
 
+export interface CognitoJwtPayload {
+  sub: string
+  'cognito:groups'?: string[]
+  iss: string
+  'cognito:username': string
+  'custom:secretId'?: string
+  origin_jti: string
+  aud: string
+  'custom:rnc'?: string
+  'custom:plan'?: string
+  'custom:businessName'?: string
+  event_id: string
+  token_use: string
+  auth_time: number
+  exp: number
+  iat: number
+  jti: string
+  email: string
+  email_verified?: boolean
+  given_name?: string
+  family_name?: string
+  name?: string
+}
+
 export interface Profile extends NextAuthProfile {
   'custom:rnc'?: string
   'custom:businessName'?: string
   'custom:plan'?: string
+}
+
+const authenticateUser = async (email: string, password: string) => {
+  const client = new CognitoIdentityProviderClient({
+    region: process.env.AWS_REGION
+  })
+
+  const params = {
+    AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
+    ClientId: process.env.COGNITO_CLIENT_ID,
+    AuthParameters: {
+      USERNAME: email,
+      PASSWORD: password,
+      SECRET_HASH: calculateSecretHash(email, process.env.COGNITO_CLIENT_ID!, process.env.COGNITO_CLIENT_SECRET!)
+    }
+  }
+
+  try {
+    const command = new InitiateAuthCommand(params)
+    const response = await client.send(command)
+
+    return {
+      accessToken: response.AuthenticationResult?.AccessToken,
+      idToken: response.AuthenticationResult?.IdToken,
+      refreshToken: response.AuthenticationResult?.RefreshToken
+    }
+  } catch (error) {
+    throw new Error('Authentication failed')
+  }
+}
+
+export const getUserAttributes = async (accessToken: string): Promise<Record<string, string>> => {
+  const client = new CognitoIdentityProviderClient({
+    region: process.env.AWS_REGION
+  })
+
+  const command = new GetUserCommand({
+    AccessToken: accessToken
+  })
+
+  try {
+    const response = await client.send(command)
+
+    return (
+      response.UserAttributes?.reduce(
+        (acc, attr) => {
+          if (attr.Name && attr.Value) {
+            acc[attr.Name] = attr.Value
+          }
+
+          return acc
+        },
+        {} as Record<string, string>
+      ) || {}
+    )
+  } catch (error) {
+    console.error('Error getting user attributes:', error)
+    throw error
+  }
 }
 
 export const authOptions: NextAuthOptions = {
@@ -53,37 +143,18 @@ export const authOptions: NextAuthOptions = {
         const { email, password } = credentials as { email: string; password: string }
 
         try {
-          // ** Login API Call to match the user credentials and receive user data in response along with his role
-          const res = await fetch(`${process.env.API_URL}/login`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, password })
-          })
+          const authResult = await authenticateUser(email, password)
 
-          const data = await res.json()
-
-          if (res.status === 401) {
-            throw new Error(JSON.stringify(data))
+          if (!authResult.idToken) {
+            throw new Error('Invalid ID token')
           }
 
-          if (res.status === 200) {
-            /*
-             * Please unset all the sensitive information of the user either from API response or before returning
-             * user data below. Below return statement will set the user object in the token and the same is set in
-             * the session which will be accessible all over the app.
-             */
-            return data
-          }
-
-          return null
-        } catch (e: any) {
-          throw new Error(e.message)
+          return getUserFromToken(authResult, email)
+        } catch (error) {
+          throw new Error('Invalid credentials')
         }
       }
     }),
-
     CognitoProvider({
       clientId: process.env.COGNITO_CLIENT_ID!,
       clientSecret: process.env.COGNITO_CLIENT_SECRET!,
@@ -118,13 +189,6 @@ export const authOptions: NextAuthOptions = {
     updateAge: 30 * 24 * 60 * 60 // ** 30 days
   },
 
-  // ** Please refer to https://next-auth.js.org/configuration/options#pages for more `pages` options
-  pages: {
-    signIn: '/login',
-    error: '/error',
-    verifyRequest: '/auth/verify'
-  },
-
   // ** Please refer to https://next-auth.js.org/configuration/options#callbacks for more `callbacks` options
   callbacks: {
     /*
@@ -139,11 +203,9 @@ export const authOptions: NextAuthOptions = {
 
       return true
     },
-    async jwt({ token, user, account }: any) {
+    async jwt({ token, user }: any) {
       if (process.env.NODE_ENV === 'development') {
-        console.log(token)
-        console.log(user)
-        console.log(account)
+        console.log('TOKEN VALUE', token)
       }
 
       if (user) {
@@ -151,35 +213,25 @@ export const authOptions: NextAuthOptions = {
       }
 
       //account is define when user is logged in one time
-      if (account) {
-        token.accessToken = account.access_token
-        token.idToken = account.id_token
-        token.refreshToken = account.refresh_token
-        token.accessTokenExpires = Date.now() + account.expires_in * 1000
+      if (user) {
+        token.accessToken = user.accessToken
+        token.idToken = user.idToken
+        token.refreshToken = user.refreshToken
+        token.accessTokenExpires = Date.now() + user.expires * 1000
         token.refreshTokenExpires = Date.now() + 30 * 24 * 60 * 60 * 1000 // ** 30 days
 
         // Decode idToken to get user information
-        const decodedIdToken: any = jwtDecode(account.id_token)
-
-        token.userProfile = {
-          givenName: decodedIdToken.given_name,
-          familyName: decodedIdToken.family_name,
-          email: decodedIdToken.email,
-          rnc: decodedIdToken['custom:rnc'],
-          businessName: decodedIdToken['custom:businessName'],
-          plan: decodedIdToken['custom:plan'],
-          verified: decodedIdToken.email_verified
-        }
       }
 
-      if (Date.now() < token.accessTokenExpires) {
-        return token
-      }
+      // if (Date.now() < token.accessTokenExpires) {
+      //   return token
+      // }
+      refreshAccessToken(token)
 
+
+      //return refreshAccessToken(token)
       return token
 
-      //TODO: Uncomment this line to refresh the access token
-      //return refreshAccessToken(token)
       // Error refreshing access token {
       //   code: 'BadRequest',
       //   message: 'The server did not understand the operation that was requested.',
@@ -191,13 +243,15 @@ export const authOptions: NextAuthOptions = {
         session.user.name = token.name // Ensure name is set from token
       }
 
-      console.log('Session Callback:', session, token)
+      const decodedInfo = getUserFromToken(token, session?.user?.email || '')
+
+      console.log('session token', { session, token })
       session.accessToken = token.accessToken as string
       session.idToken = token.idToken as string
       session.refreshToken = token.refreshToken as string
       session.user = {
         ...session.user,
-        ...(token.userProfile || {})
+        ...decodedInfo.userProfile
       }
 
       return session
@@ -212,58 +266,55 @@ export const authOptions: NextAuthOptions = {
 
 export async function refreshAccessToken(token: any) {
   try {
-    const url = `${process.env.COGNITO_ISSUER}/oauth2/token`
-    const body = new URLSearchParams({
-      grant_type: 'refresh_token',
-      refresh_token: token.refreshToken,
-      client_id: process.env.COGNITO_CLIENT_ID!,
-      client_secret: process.env.COGNITO_CLIENT_SECRET!
+    const client = new CognitoIdentityProviderClient({
+      region: process.env.AWS_REGION
     })
-
-    console.log('Client ID:', process.env.COGNITO_CLIENT_ID)
-    console.log('Client Secret:', process.env.COGNITO_CLIENT_SECRET)
-
-    console.log('Request URL:', url)
-    console.log('Request Body:', body.toString())
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body
-    })
-
-    console.log('refreshAccessToken Response:', token)
-
-    const refreshedTokens = await response.json()
-
-    if (response.status === 401) {
-      console.error('BadRequest or Unauthorized error:', refreshedTokens)
-
-      return {
-        ...token,
-        error: 'RefreshAccessTokenError',
-        accessToken: null,
-        accessTokenExpires: 0,
-        idToken: null,
-        refreshToken: null,
-        userProfile: null
+    const params = {
+      AuthFlow: AuthFlowType.REFRESH_TOKEN_AUTH,
+      ClientId: process.env.COGNITO_CLIENT_ID,
+      AuthParameters: {
+        REFRESH_TOKEN: token.refreshToken,
+        SECRET_HASH: calculateSecretHash(
+          token.email,
+          process.env.COGNITO_CLIENT_ID!,
+          process.env.COGNITO_CLIENT_SECRET!
+        )
       }
     }
 
-    if (!response.ok) {
-      throw refreshedTokens
-    }
+    const command = new InitiateAuthCommand(params)
+    const response = await client.send(command)
 
-    return {
-      ...token,
-      accessToken: refreshedTokens.access_token,
-      accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
-      idToken: refreshedTokens.id_token ?? token.idToken,
-      refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
-      userProfile: token.userProfile // ** Retain userProfile information
-    }
+    console.log('refreshAccessToken Response:', response)
+
+    // const refreshedTokens = await response.json()
+
+    // if (response.status === 401) {
+    //   console.error('BadRequest or Unauthorized error:', refreshedTokens)
+
+    //   return {
+    //     ...token,
+    //     error: 'RefreshAccessTokenError',
+    //     accessToken: null,
+    //     accessTokenExpires: 0,
+    //     idToken: null,
+    //     refreshToken: null,
+    //     userProfile: null
+    //   }
+    // }
+
+    // if (!response.ok) {
+    //   throw refreshedTokens
+    // }
+
+    // return {
+    //   ...token,
+    //   accessToken: refreshedTokens.access_token,
+    //   accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
+    //   idToken: refreshedTokens.id_token ?? token.idToken,
+    //   refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
+    //   userProfile: token.userProfile // ** Retain userProfile information
+    // }
   } catch (error) {
     console.error('Error refreshing access token', error)
 
@@ -276,4 +327,44 @@ export async function refreshAccessToken(token: any) {
   }
 }
 
-export default NextAuth(authOptions)
+interface AuthUser {
+  id: string
+  email?: string
+  expires: number
+  name?: string
+  accessToken: string | undefined
+  idToken: string | undefined
+  refreshToken: string | undefined
+  userProfile: {
+    givenName?: string
+    familyName?: string
+    email?: string
+    rnc: string
+    businessName?: string
+    plan?: string
+    verified?: boolean
+  }
+}
+
+const getUserFromToken = (authResult: any, email?: string): AuthUser => {
+  const decodedToken = jwtDecode(authResult.idToken) as CognitoJwtPayload
+
+  return {
+    id: email || '',
+    email: email,
+    expires: decodedToken.exp,
+    name: decodedToken?.given_name + ' ' + decodedToken?.family_name || email,
+    accessToken: authResult.accessToken,
+    idToken: authResult.idToken,
+    refreshToken: authResult.refreshToken,
+    userProfile: {
+      givenName: decodedToken?.given_name,
+      familyName: decodedToken?.family_name,
+      email: decodedToken?.email,
+      rnc: decodedToken['custom:rnc'] || '',
+      businessName: decodedToken['custom:businessName'],
+      plan: decodedToken['custom:plan'],
+      verified: decodedToken.email_verified
+    }
+  }
+}

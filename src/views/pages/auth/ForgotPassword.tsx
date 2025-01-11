@@ -4,9 +4,9 @@
 import Link from 'next/link'
 
 // MUI Imports
-import Typography from '@mui/material/Typography'
-import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
+import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
 
 // Third-party Imports
 import classnames from 'classnames'
@@ -15,8 +15,8 @@ import classnames from 'classnames'
 import type { Mode } from '@core/types'
 
 // Component Imports
-import Logo from '@components/layout/shared/Logo'
 import Illustrations from '@components/Illustrations'
+import Logo from '@components/layout/shared/Logo'
 
 // Hook Imports
 import { useImageVariant } from '@core/hooks/useImageVariant'
@@ -71,20 +71,20 @@ const ForgotPasswordV2 = ({ mode }: { mode: Mode }) => {
         </Link>
         <div className='flex flex-col gap-5 is-full sm:is-auto md:is-full sm:max-is-[400px] md:max-is-[unset]'>
           <div>
-            <Typography variant='h4'>Forgot Password 🔒</Typography>
+            <Typography variant='h4'>Olvidó su contraseña 🔒</Typography>
             <Typography className='mbs-1'>
-              Enter your email and we&#39;ll send you instructions to reset your password
+              Ingrese su correo electrónico y le enviaremos instrucciones para restablecer su contraseña
             </Typography>
           </div>
           <form noValidate autoComplete='off' onSubmit={e => e.preventDefault()} className='flex flex-col gap-5'>
-            <TextField autoFocus fullWidth label='Email' />
+            <TextField autoFocus fullWidth label='Correo Electrónico' />
             <Button fullWidth variant='contained' type='submit'>
-              Send reset link
+              Enviar enlace
             </Button>
             <Typography className='flex justify-center items-center' color='primary'>
               <Link href='/login' className='flex items-center'>
                 <i className='ri-arrow-left-s-line' />
-                <span>Back to Login</span>
+                <span>Regresar al Inicio de sessión</span>
               </Link>
             </Typography>
           </form>

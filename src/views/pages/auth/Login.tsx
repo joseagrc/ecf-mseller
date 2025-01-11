@@ -6,19 +6,18 @@ import { useState } from 'react'
 // Next Imports
 import { useRouter } from 'next/navigation'
 
-import { useForm, Controller } from 'react-hook-form'
-import { signIn } from 'next-auth/react'
-import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { signIn } from 'next-auth/react'
+import { Controller, useForm } from 'react-hook-form'
+import * as yup from 'yup'
 
 // MUI Imports
-import Typography from '@mui/material/Typography'
-import TextField from '@mui/material/TextField'
+import Checkbox from '@mui/material/Checkbox'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
-import Checkbox from '@mui/material/Checkbox'
-import Button from '@mui/material/Button'
-import FormControlLabel from '@mui/material/FormControlLabel'
+import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
 
 // Third-party Imports
 import classnames from 'classnames'
@@ -26,12 +25,14 @@ import classnames from 'classnames'
 // Type Imports
 import { FormControl, FormHelperText } from '@mui/material'
 
+import { LoadingButton } from '@mui/lab'
+
 import type { Mode } from '@core/types'
 
 // Component Imports
+import Illustrations from '@components/Illustrations'
 import Link from '@components/Link'
 import Logo from '@components/layout/shared/Logo'
-import Illustrations from '@components/Illustrations'
 
 // Config Imports
 import themeConfig from '@configs/themeConfig'
@@ -97,7 +98,7 @@ const LoginV2 = ({ mode }: { mode: Mode }) => {
     const { email, password } = data
 
     try {
-      const result = await signIn('cognito', {
+      const result = await signIn('credentials', {
         email: email,
         password: password,
         redirect: false
@@ -211,9 +212,9 @@ const LoginV2 = ({ mode }: { mode: Mode }) => {
                 Olvidó la contraseña?
               </Typography>
             </div>
-            <Button fullWidth variant='contained' type='submit'>
+            <LoadingButton fullWidth variant='contained' type='submit' loading={isSubmitting}>
               Iniciar Sesión
-            </Button>
+            </LoadingButton>
             <div className='flex justify-center items-center flex-wrap gap-2'>
               <Typography>Nuevo en nuestra plataforma?</Typography>
               <Typography component={Link} color='primary' href='/register'>
