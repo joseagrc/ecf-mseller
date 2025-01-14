@@ -1,10 +1,14 @@
 'use client'
 
 // Next Imports
+import { useState } from 'react'
+
 import Link from 'next/link'
 
 // MUI Imports
-import Button from '@mui/material/Button'
+import { useRouter } from 'next/navigation'
+
+import { Alert, LoadingButton } from '@mui/lab'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 
@@ -12,6 +16,16 @@ import Typography from '@mui/material/Typography'
 import classnames from 'classnames'
 
 // Type Imports
+import { yupResolver } from '@hookform/resolvers/yup'
+
+import axios from 'axios'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'react-toastify'
+
+import * as yup from 'yup'
+
 import type { Mode } from '@core/types'
 
 // Component Imports
@@ -22,7 +36,46 @@ import Logo from '@components/layout/shared/Logo'
 import { useImageVariant } from '@core/hooks/useImageVariant'
 import { useSettings } from '@core/hooks/useSettings'
 
+const schema = yup
+  .object({
+    email: yup.string().email('Por favor ingrese un email válido').required('El email es requerido')
+  })
+  .required()
+
+type ForgotPasswordForm = yup.InferType<typeof schema>
+
 const ForgotPasswordV2 = ({ mode }: { mode: Mode }) => {
+  const [isLoading, setIsLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState('')
+  const router = useRouter()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm<ForgotPasswordForm>({
+    resolver: yupResolver(schema)
+  })
+
+  const onSubmit = async (data: ForgotPasswordForm) => {
+    try {
+      setIsLoading(true)
+      setError('')
+
+      await axios.post('/api/auth/forgot-password', {
+        email: data.email
+      })
+
+      setSuccess(true)
+      toast.success('Código de seguridad enviado a su email')
+      router.push(`/change-password?email=${data.email}`)
+    } catch (err) {
+      setError('No se pudo enviar el correo. Por favor intente nuevamente.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   // Vars
   const darkImg = '/images/pages/auth-v2-mask-dark.png'
   const lightImg = '/images/pages/auth-v2-mask-light.png'
@@ -73,21 +126,35 @@ const ForgotPasswordV2 = ({ mode }: { mode: Mode }) => {
           <div>
             <Typography variant='h4'>Olvidó su contraseña 🔒</Typography>
             <Typography className='mbs-1'>
-              Ingrese su correo electrónico y le enviaremos instrucciones para restablecer su contraseña
+              Ingrese su email y le enviaremos las instrucciones para restablecer su contraseña
             </Typography>
           </div>
-          <form noValidate autoComplete='off' onSubmit={e => e.preventDefault()} className='flex flex-col gap-5'>
-            <TextField autoFocus fullWidth label='Correo Electrónico' />
-            <Button fullWidth variant='contained' type='submit'>
-              Enviar enlace
-            </Button>
-            <Typography className='flex justify-center items-center' color='primary'>
-              <Link href='/login' className='flex items-center'>
-                <i className='ri-arrow-left-s-line' />
-                <span>Regresar al Inicio de sessión</span>
-              </Link>
-            </Typography>
+
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className='flex flex-col gap-4'>
+              <TextField
+                fullWidth
+                label='Email'
+                {...register('email')}
+                error={Boolean(errors.email)}
+                helperText={errors.email?.message}
+              />
+
+              <LoadingButton fullWidth type='submit' variant='contained' loading={isLoading}>
+                Enviar enlace
+              </LoadingButton>
+
+              {error && <Alert severity='error'>{error}</Alert>}
+
+              {success && <Alert severity='success'>Instrucciones enviadas a su email</Alert>}
+            </div>
           </form>
+
+          <Typography className='text-center'>
+            <Link href='/login'>
+              <span>Volver al login</span>
+            </Link>
+          </Typography>
         </div>
       </div>
     </div>

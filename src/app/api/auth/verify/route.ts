@@ -1,15 +1,8 @@
-import crypto from 'crypto'
-
 import { NextResponse } from 'next/server'
 
 import { CognitoIdentityProviderClient, ConfirmSignUpCommand } from '@aws-sdk/client-cognito-identity-provider'
 
-function calculateSecretHash(username: string): string {
-  const message = username + process.env.COGNITO_CLIENT_ID
-  const hash = crypto.createHmac('SHA256', process.env.COGNITO_CLIENT_SECRET!).update(message).digest('base64')
-
-  return hash
-}
+import { calculateSecretHash } from '@/utils/calculateSecretHash'
 
 export async function POST(req: Request) {
   try {

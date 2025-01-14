@@ -70,7 +70,7 @@ const authenticateUser = async (email: string, password: string) => {
     AuthParameters: {
       USERNAME: email,
       PASSWORD: password,
-      SECRET_HASH: calculateSecretHash(email, process.env.COGNITO_CLIENT_ID!, process.env.COGNITO_CLIENT_SECRET!)
+      SECRET_HASH: calculateSecretHash(email)
     }
   }
 
@@ -228,7 +228,6 @@ export const authOptions: NextAuthOptions = {
       // }
       refreshAccessToken(token)
 
-
       //return refreshAccessToken(token)
       return token
 
@@ -274,11 +273,7 @@ export async function refreshAccessToken(token: any) {
       ClientId: process.env.COGNITO_CLIENT_ID,
       AuthParameters: {
         REFRESH_TOKEN: token.refreshToken,
-        SECRET_HASH: calculateSecretHash(
-          token.email,
-          process.env.COGNITO_CLIENT_ID!,
-          process.env.COGNITO_CLIENT_SECRET!
-        )
+        SECRET_HASH: calculateSecretHash(token.email)
       }
     }
 
