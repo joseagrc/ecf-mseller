@@ -58,7 +58,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-, "src/app/api/add-certificate"  ],
+, "src/app/api/certificate"  ],
   "exclude": [
     "node_modules"
   ]

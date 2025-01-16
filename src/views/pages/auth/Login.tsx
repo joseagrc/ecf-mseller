@@ -23,7 +23,7 @@ import Typography from '@mui/material/Typography'
 import classnames from 'classnames'
 
 // Type Imports
-import { FormControl, FormHelperText } from '@mui/material'
+import { Alert, FormControl, FormHelperText } from '@mui/material'
 
 import { LoadingButton } from '@mui/lab'
 
@@ -59,6 +59,7 @@ interface FormData {
 const LoginV2 = ({ mode }: { mode: Mode }) => {
   // States
   const [isPasswordShown, setIsPasswordShown] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Vars
   const darkImg = '/images/pages/auth-v2-mask-dark.png'
@@ -97,6 +98,8 @@ const LoginV2 = ({ mode }: { mode: Mode }) => {
   const onSubmit = async (data: FormData) => {
     const { email, password } = data
 
+    setError(null)
+
     try {
       const result = await signIn('credentials', {
         email: email,
@@ -105,14 +108,12 @@ const LoginV2 = ({ mode }: { mode: Mode }) => {
       })
 
       if (result?.error) {
-        // Handle error
-        console.error('SignIn Error:', result.error)
+        setError('Credenciales inválidas. Por favor, verifique su correo y contraseña.')
       } else {
-        // Redirect on success
         router.push('/home')
       }
     } catch (error) {
-      console.error('SignIn Exception:', error)
+      setError('Ocurrió un error al intentar iniciar sesión.')
     }
   }
 
@@ -148,6 +149,7 @@ const LoginV2 = ({ mode }: { mode: Mode }) => {
             <Typography variant='h4'>{`Bienvenido a ${themeConfig.templateName}!`}</Typography>
             <Typography className='mbs-1'>Inicie sesión para consultar sus facturas electrónicas</Typography>
           </div>
+          {error && <Alert severity='error'>{error}</Alert>}
           <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-5'>
             <FormControl fullWidth sx={{ mb: 4 }}>
               <Controller

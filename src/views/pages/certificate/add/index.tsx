@@ -15,6 +15,7 @@ import Typography from '@mui/material/Typography'
 
 // Styled Component Imports
 import AddCertificate from './AddCertificate'
+import CertificateTable from './CertificateTable'
 
 // Styled Dropzone Component
 
@@ -23,6 +24,7 @@ const CertificateLayout = () => {
     <div>
       <Card>
         <CardHeader title='Cargar Certificado' sx={{ '& .MuiCardHeader-action': { alignSelf: 'center' } }} />
+        <CertificateTable />
         <CardContent>
           <Typography variant='body2' color='text.secondary' sx={{ mb: 4 }}>
             Si no posee un certificado digital válido, puede solicitarlo en línea a través de{' '}

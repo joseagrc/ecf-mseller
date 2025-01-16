@@ -17,8 +17,9 @@ import { useDropzone } from 'react-dropzone'
 // Component Imports
 import { toast } from 'react-toastify'
 
-import { Link, styled, type BoxProps } from '@mui/material'
+import { Grid, Link, styled, type BoxProps } from '@mui/material'
 
+import AppReactDatepicker from '@/libs/styles/AppReactDatepicker'
 import AppReactDropzone from '@/libs/styles/AppReactDropzone'
 import CustomAvatar from '@core/components/mui/Avatar'
 
@@ -51,6 +52,7 @@ const AddCertificate = (props: AddCertificateProps) => {
   const [error, setError] = useState<string>('')
   const [password, setPassword] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
+  const [expirationDate, setExpirationDate] = useState<Date | null | undefined>(null)
 
   const { getRootProps, getInputProps } = useDropzone({
     maxFiles: 1,
@@ -97,13 +99,16 @@ const AddCertificate = (props: AddCertificateProps) => {
     try {
       const base64 = await convertToBase64(files[0])
 
-      const response = await fetch('/api/add-certificate', {
+      const formattedDate = expirationDate ? new Date(expirationDate).toISOString().split('T')[0] : null
+
+      const response = await fetch('/api/certificate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           certificatePassword: password,
+          expirationDate: formattedDate,
           certificate: {
             content: base64,
             filename: files[0].name
@@ -119,6 +124,8 @@ const AddCertificate = (props: AddCertificateProps) => {
 
       toast.success('Certificado agregado exitosamente')
       handleRemoveFile()
+      setPassword('')
+      setExpirationDate(null)
 
       if (props.callback) props.callback()
     } catch (err: any) {
@@ -133,23 +140,36 @@ const AddCertificate = (props: AddCertificateProps) => {
     <ListItem key={file.name} className='pis-4 plb-3'>
       <div className='file-details'>
         <div className='file-preview'>{renderFilePreview()}</div>
-        <div>
-          <Typography className='file-name font-medium' color='text.primary'>
-            {file.name}
-          </Typography>
-          <TextField
-            type='password'
-            label='Contraseña del certificado'
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            fullWidth
-            required
-            margin='normal'
-            size='small'
-            error={password.length === 0}
-            helperText={password.length === 0 ? 'La contraseña es requerida' : ''}
-          />
-        </div>
+        <Grid container spacing={4}>
+          <Grid item sm={12}>
+            <Typography className='file-name font-medium' color='text.primary'>
+              {file.name}
+            </Typography>
+          </Grid>
+          <Grid item>
+            <TextField
+              type='password'
+              label='Contraseña del certificado'
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              fullWidth
+              required
+              margin='normal'
+              size='small'
+              error={password.length === 0}
+              helperText={password.length === 0 ? 'La contraseña es requerida' : ''}
+            />
+          </Grid>
+          <Grid item>
+            <AppReactDatepicker
+              selected={expirationDate}
+              placeholderText='DD-MM-YYYY'
+              dateFormat={'dd-MM-yyyy'}
+              onChange={(date: Date | null) => setExpirationDate(date)}
+              customInput={<TextField margin='normal' size='small' fullWidth label='Fecha de vencimiento' />}
+            />
+          </Grid>
+        </Grid>
       </div>
       <IconButton onClick={() => handleRemoveFile()}>
         <i className='ri-close-line text-xl' />
