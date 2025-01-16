@@ -8,7 +8,6 @@ import dayjs from 'dayjs'
 
 import LoadingWrapper from '@/components/LoadingWrapper'
 
-
 interface CertificateData {
   expirationDate: string
   createdAt: number
@@ -35,15 +34,13 @@ const CertificateTable = () => {
 
   const handleDownload = async (certificateKey: string) => {
     try {
-      const response = await axios.get(`api/certificate?file=${certificateKey}`, {
-        responseType: 'blob'
-      })
+      const response = await axios.get(`api/certificate?file=${certificateKey}`)
+      const { presignedUrl } = response.data
 
-      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const fileName = `${certificateKey.split('/').pop()}.xml`
       const link = document.createElement('a')
-
-      link.href = url
-      link.setAttribute('download', `${data?.rnc}_certificate.p12`)
+      link.href = presignedUrl
+      link.setAttribute('download', fileName)
       document.body.appendChild(link)
       link.click()
       link.remove()
@@ -70,31 +67,31 @@ const CertificateTable = () => {
   return (
     <TableContainer>
       <Table>
-      <TableHead>
-        <TableRow>
-        <TableCell style={{ width: '25%' }}>RNC</TableCell>
-        <TableCell style={{ width: '25%' }}>Expira en</TableCell>
-        <TableCell style={{ width: '25%' }}>Fecha de Creación</TableCell>
-        <TableCell style={{ width: '25%' }}></TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        <TableRow>
-        <TableCell>{data.rnc}</TableCell>
-        <TableCell>{`${dayjs(data.expirationDate).diff(dayjs(), 'day')} días`}</TableCell>
-        <TableCell>{dayjs(data.createdAt).format('DD/MM/YYYY HH:mm')}</TableCell>
-        <TableCell>
-          <LoadingButton
-          variant='contained'
-          startIcon={<i className='mdi--download-circle-outline' />}
-          onClick={() => handleDownload(data.certificateKey)}
-          loading={loading}
-          >
-          Descargar Certificado
-          </LoadingButton>
-        </TableCell>
-        </TableRow>
-      </TableBody>
+        <TableHead>
+          <TableRow>
+            <TableCell style={{ width: '25%' }}>RNC</TableCell>
+            <TableCell style={{ width: '25%' }}>Expira en</TableCell>
+            <TableCell style={{ width: '25%' }}>Fecha de Creación</TableCell>
+            <TableCell style={{ width: '25%' }}></TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          <TableRow>
+            <TableCell>{data.rnc}</TableCell>
+            <TableCell>{`${dayjs(data.expirationDate).diff(dayjs(), 'day')} días`}</TableCell>
+            <TableCell>{dayjs(data.createdAt).format('DD/MM/YYYY HH:mm')}</TableCell>
+            <TableCell>
+              <LoadingButton
+                variant='contained'
+                startIcon={<i className='mdi--download-circle-outline' />}
+                onClick={() => handleDownload(data.certificateKey)}
+                loading={loading}
+              >
+                Descargar Certificado
+              </LoadingButton>
+            </TableCell>
+          </TableRow>
+        </TableBody>
       </Table>
     </TableContainer>
   )

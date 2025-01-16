@@ -1,5 +1,5 @@
 // React Imports
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 // Next Imports
 
@@ -29,11 +29,13 @@ import {
   getSortedRowModel,
   useReactTable
 } from '@tanstack/react-table'
+import axios from 'axios'
 import classnames from 'classnames'
 
 import { useDispatch, useSelector } from 'react-redux'
 
 import {
+  CircularProgress,
   Paper,
   Table,
   TableBody,
@@ -88,6 +90,8 @@ const fuzzyFilter: FilterFn<any> = (): any => {}
 
 const DocumentListTable = () => {
   // States
+  // Add loading state
+  const [downloadingIds, setDownloadingIds] = useState<string[]>([])
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState('')
   const [openDialog, setOpenDialog] = useState(false)
@@ -109,6 +113,32 @@ const DocumentListTable = () => {
     setDgiiResponses(responses)
     setOpenDialog(true)
   }
+
+  const handleDownload = useCallback(
+    async (id: string, documentKey: string) => {
+      if (downloadingIds.includes(id)) return
+
+      setDownloadingIds(prev => [...prev, id])
+
+      try {
+        const response = await axios.get(`/api/documents/download?file=${documentKey}`)
+        const { presignedUrl } = response.data
+
+        const fileName = `${documentKey.split('/').pop()}.xml`
+        const link = document.createElement('a')
+        link.href = presignedUrl
+        link.setAttribute('download', fileName)
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+      } catch (error) {
+        console.error('Download failed:', error)
+      } finally {
+        setDownloadingIds(prev => prev.filter(downloadId => downloadId !== id))
+      }
+    },
+    [downloadingIds]
+  )
 
   const handleCloseDialog = () => {
     setOpenDialog(false)
@@ -159,8 +189,8 @@ const DocumentListTable = () => {
             </IconButton>
           </Tooltip>
           <Tooltip title='Descargar XML'>
-            <IconButton onClick={() => {}}>
-              <i className='mdi-file-xml-box' />
+            <IconButton onClick={() => handleDownload(row.id, row.original.signedXml)}>
+              {downloadingIds.includes(row.id) ? <CircularProgress size={20} /> : <i className='mdi-file-xml-box' />}
             </IconButton>
           </Tooltip>
           <Tooltip title='Ver Respuesta DGII'>

@@ -87,7 +87,7 @@ const LoginV2 = ({ mode }: { mode: Mode }) => {
   const {
     control,
     handleSubmit,
-    formState: { errors, isSubmitting }
+    formState: { errors, isLoading, isSubmitting }
   } = useForm({
     defaultValues,
 
@@ -165,7 +165,7 @@ const LoginV2 = ({ mode }: { mode: Mode }) => {
                     onChange={onChange}
                     error={Boolean(errors.email)}
                     placeholder='correo eléctronico'
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isLoading}
                   />
                 )}
               />
@@ -186,7 +186,7 @@ const LoginV2 = ({ mode }: { mode: Mode }) => {
                     onChange={onChange}
                     error={Boolean(errors.password)}
                     placeholder='contraseña'
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isLoading}
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position='end'>
@@ -214,7 +214,7 @@ const LoginV2 = ({ mode }: { mode: Mode }) => {
                 Olvidó la contraseña?
               </Typography>
             </div>
-            <LoadingButton fullWidth variant='contained' type='submit' loading={isSubmitting}>
+            <LoadingButton fullWidth variant='contained' type='submit' loading={isSubmitting || isLoading}>
               Iniciar Sesión
             </LoadingButton>
             <div className='flex justify-center items-center flex-wrap gap-2'>
