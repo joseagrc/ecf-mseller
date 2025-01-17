@@ -99,15 +99,17 @@ const DocumentListTable = () => {
   const dispatch = useDispatch<AppDispatch>()
   const documentStore = useSelector((state: RootState) => state.documentReducer)
   const pageSize = 10
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const params = {
-    documentType: 'Factura de Crédito Fiscal Electrónico',
-    status: 'Error',
+    // documentType: 'Factura de Crédito Fiscal Electrónico',
+
+    // status: 'Error',
     limit: pageSize
   }
 
   useEffect(() => {
     dispatch(getDocuments(params))
-  }, [dispatch])
+  }, [])
 
   const handleOpenDialog = (responses: string[]) => {
     setDgiiResponses(responses)
@@ -126,6 +128,7 @@ const DocumentListTable = () => {
 
         const fileName = `${documentKey.split('/').pop()}.xml`
         const link = document.createElement('a')
+
         link.href = presignedUrl
         link.setAttribute('download', fileName)
         document.body.appendChild(link)

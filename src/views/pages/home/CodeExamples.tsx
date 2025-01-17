@@ -1,27 +1,20 @@
-/**
- * Componente para realizar una solicitud POST a una API utilizando FETCH.
- *
- * Pasos para realizar la solicitud:
- * 1. Iniciar sesión en el sistema utilizando el recurso {{amazon_ws}}/customer/authentication.
- *    - El cuerpo de la solicitud debe contener:
- *      {
- *        "email": "",
- *        "password": ""
- *      }
- * 2. Utilizar el idToken retornado por la API (NO el accessToken).
- * 3. Realizar la solicitud POST a la API deseada adjuntando el token de autorización y la x-api-key en el encabezado.
- */
 import { useEffect, useState } from 'react'
 
-import { Button } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
+import { Accordion, AccordionDetails, AccordionSummary, CircularProgress, Stack, Typography } from '@mui/material'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import TextField from '@mui/material/TextField'
 import { useSession } from 'next-auth/react'
+import { useDispatch, useSelector } from 'react-redux'
 import { Prism } from 'react-syntax-highlighter'
 import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { toast } from 'react-toastify'
+
+import type { AppDispatch, RootState } from '@/redux-store'
+import { getApiKeys } from '@/redux-store/slices/apiKeySlice'
 
 const SyntaxHighlighter = Prism as any
 
@@ -41,43 +34,16 @@ const makeApiRequest = async ({
   direccionEmisor,
   fechaEmision,
   apiKey,
-  email,
-  password,
   eNCF
 }: MakeApiRequestProps) => {
-  const host = 'https://j8modo6at8.execute-api.us-east-1.amazonaws.com/TesteCF' //'https://ecf.api.mseller.app' // Reemplazar con la URL del entorno
-  const loginUrl = `${host}/customer/authentication`
-  const apiUrl = `${host}/documentos-ecf`
-
-  // Datos de inicio de sesión
-  const loginData = {
-    email: email,
-    password: password
-  }
+  const host = '/api/communication'
 
   try {
-    // Iniciar sesión y obtener el idToken
-    const loginResponse = await fetch(loginUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(loginData)
-    })
-
-    if (!loginResponse.ok) {
-      throw new Error('Error al iniciar sesión')
-    }
-
-    const loginResult = await loginResponse.json()
-    const idToken = loginResult.idToken
-
     // Realizar la solicitud POST a la API deseada
-    const apiResponse = await fetch(apiUrl, {
+    const apiResponse = await fetch(host, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${idToken}`,
         'x-api-key': apiKey // Reemplazar con la x-api-key correspondiente
       },
       body: JSON.stringify({
@@ -87,7 +53,7 @@ const makeApiRequest = async ({
             IdDoc: {
               TipoeCF: '31',
               eNCF: eNCF,
-              FechaVencimientoSecuencia: '31-12-2026',
+              FechaVencimientoSecuencia: '31-12-2025',
               IndicadorEnvioDiferido: '1',
               IndicadorMontoGravado: '0',
               TipoIngresos: '05',
@@ -150,20 +116,34 @@ const makeApiRequest = async ({
               SubtotalMontoNoFacturablePagina: 0
             }
           },
-          FechaHoraFirma: '15-07-2023 05:07:00'
+          FechaHoraFirma: '17-01-2025 05:07:00' //getCurrentFormattedDateTime()
         }
       })
     })
 
+    if (apiResponse.status === 401) {
+      throw new Error('Error al iniciar sesión')
+    }
+
+    if (apiResponse.status === 403) {
+      throw new Error('Api Key no válida ó incorrecta, por favor verifique la Api Key')
+    }
+
     if (!apiResponse.ok) {
-      throw new Error('Error en la solicitud a la API')
+      const data = await apiResponse.json()
+
+      throw new Error(data.message || 'Error en la solicitud a la API')
     }
 
     const apiResult = await apiResponse.json()
 
     console.log('Respuesta de la API:', apiResult)
-  } catch (error) {
+    toast.success('eCF enviado correctamente')
+
+    return apiResult
+  } catch (error: any) {
     console.error('Error:', error)
+    toast.error(error?.message || 'Error al realizar la solicitud a la API')
   }
 }
 
@@ -174,16 +154,48 @@ export const CodeExamples = () => {
   const [rncEmisor, setRncEmisor] = useState('12345678')
   const [razonSocialEmisor, setRazonSocialEmisor] = useState('Tu Negocio')
   const [direccionEmisor, setDireccionEmisor] = useState('DireccionEmisor1')
-  const [fechaEmision, setFechaEmision] = useState('16-12-2024')
+
+  const getTodayDate = () => {
+    const today = new Date()
+    const day = String(today.getDate()).padStart(2, '0')
+    const month = String(today.getMonth() + 1).padStart(2, '0')
+    const year = today.getFullYear()
+
+    return `${day}-${month}-${year}`
+  }
+  const [fechaEmision, setFechaEmision] = useState(getTodayDate())
   const [apiKey, setApiKey] = useState('your-api-key')
   const [email, setEmail] = useState('user@example.com')
   const [password, setPassword] = useState('')
-  const [eNCF, setENCF] = useState('E310435300215')
+
+  //const [eNCF, setENCF] = useState('E310435300215')
+  const generateRandomENCF = () => {
+    const prefix = 'E31'
+    const randomNumbers = Math.random().toString().slice(2, 12)
+
+    return `${prefix}${randomNumbers}`
+  }
+
+  const [eNCF, setENCF] = useState(generateRandomENCF())
+
+  const [loading, setLoading] = useState(false)
+  const [response, setResponse] = useState('')
+
+  const dispatch = useDispatch<AppDispatch>()
+  const apiKeyStore = useSelector((state: RootState) => state.apiKeyReducer)
+
+  useEffect(() => {
+    if (apiKeyStore.apiKeys.length === 0) {
+      dispatch(getApiKeys())
+    } else {
+      setApiKey(apiKeyStore?.apiKeys?.[0]?.value)
+    }
+  }, [apiKeyStore, dispatch])
 
   useEffect(() => {
     if (session.data) {
       setRncEmisor(session.data?.user.rnc || '130359334')
-      setRazonSocialEmisor(session.data?.razonSocial || 'Tu Negocio')
+      setRazonSocialEmisor(session.data?.user.businessName || 'Tu Negocio')
       setEmail(session.data?.user?.email || 'Tu correo electrónico')
       setDireccionEmisor(session.data?.direccion || 'DireccionEmisor1')
     }
@@ -193,16 +205,53 @@ export const CodeExamples = () => {
     setValue(newValue)
   }
 
+  const handleTestConnection = async () => {
+    setLoading(true)
+    try {
+      const result = await makeApiRequest({
+        rncEmisor,
+        razonSocialEmisor,
+        direccionEmisor,
+        fechaEmision,
+        apiKey,
+        email,
+        password,
+        eNCF
+      })
+
+      console.log('Result:', result)
+      setResponse(JSON.stringify(result, null, 2))
+    } catch (error) {
+      setResponse(JSON.stringify(error, null, 2))
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <Box sx={{ width: '100%' }}>
-      <Button
-        variant='contained'
-        onClick={() =>
-          makeApiRequest({ rncEmisor, razonSocialEmisor, direccionEmisor, fechaEmision, apiKey, email, password, eNCF })
-        }
-      >
-        Probar conexión
-      </Button>
+      <Box>
+        <Typography variant='h5'> Entornos </Typography>
+        <Typography variant='caption' sx={{ pt: 2 }}>
+          Utilice uno de estos entornos, estos entornos son los mismos que deben ser colocados durante la certificación{' '}
+        </Typography>
+        <Typography variant='h6' sx={{ pt: 2 }}>
+          {' '}
+          Prueba{' '}
+        </Typography>
+        <code>https://ecf.api.mseller.app/TesteCF</code>
+        <Typography variant='h6' sx={{ pt: 2 }}>
+          {' '}
+          Certificación{' '}
+        </Typography>
+        <code>https://ecf.api.mseller.app/CerteCF</code>
+        <Typography variant='h6' sx={{ pt: 2 }}>
+          {' '}
+          Producción{' '}
+        </Typography>
+        <code>https://ecf.api.mseller.app/eCF</code>
+      </Box>
+
       <Tabs value={value} onChange={handleChange} aria-label='code examples'>
         <Tab label='JavaScript' />
         <Tab label='C#' />
@@ -250,6 +299,7 @@ export const CodeExamples = () => {
             <TextField
               label='API Key'
               value={apiKey}
+              disabled={apiKeyStore.isLoading}
               onChange={e => setApiKey(e.target.value)}
               fullWidth
               margin='normal'
@@ -275,8 +325,17 @@ export const CodeExamples = () => {
       </Box>
       {value === 0 && (
         <Box sx={{ p: 3 }}>
-          <SyntaxHighlighter language='javascript' style={materialDark}>
-            {`const makeApiRequest = async (rncEmisor, razonSocialEmisor, direccionEmisor, fechaEmision, apiKey, email, password, eNCF) => {
+          <Accordion defaultExpanded={false}>
+            <AccordionSummary
+              expandIcon={<i className='mdi-expand-horizontal' />}
+              aria-controls='code-content'
+              id='code-header'
+            >
+              <Typography>Ver código de ejemplo</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <SyntaxHighlighter language='javascript' style={materialDark}>
+                {`const makeApiRequest = async (rncEmisor, razonSocialEmisor, direccionEmisor, fechaEmision, apiKey, email, password, eNCF) => {
   const host = 'https://ecf.api.mseller.app';
   const loginUrl = \`\${host}/customer/authentication\`;
   const apiUrl = \`\${host}/documentos-ecf\`;
@@ -394,13 +453,24 @@ export const CodeExamples = () => {
     console.error('Error:', error);
   }
 };`}
-          </SyntaxHighlighter>
+              </SyntaxHighlighter>
+            </AccordionDetails>
+          </Accordion>
         </Box>
       )}
       {value === 1 && (
         <Box sx={{ p: 3 }}>
-          <SyntaxHighlighter language='csharp' style={materialDark}>
-            {`using System;
+          <Accordion defaultExpanded={false}>
+            <AccordionSummary
+              expandIcon={<i className='mdi-expand-horizontal' />}
+              aria-controls='code-content'
+              id='code-header'
+            >
+              <Typography>Ver código de ejemplo</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <SyntaxHighlighter language='csharp' style={materialDark}>
+                {`using System;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -540,13 +610,20 @@ public class ApiClient
         }
     }
 }`}
-          </SyntaxHighlighter>
+              </SyntaxHighlighter>
+            </AccordionDetails>
+          </Accordion>
         </Box>
       )}
       {value === 2 && (
         <Box sx={{ p: 3 }}>
-          <SyntaxHighlighter language='bash' style={materialDark}>
-            {`host="https://ecf.api.mseller.app"
+          <Accordion defaultExpanded={false}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls='code-content' id='code-header'>
+              <Typography>Ver código de ejemplo</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <SyntaxHighlighter language='bash' style={materialDark}>
+                {`host="https://ecf.api.mseller.app"
 login_url="\${host}/customer/authentication"
 api_url="\${host}/documentos-ecf"
 
@@ -635,8 +712,28 @@ api_data='{
 api_response=$(curl -s -X POST -H "Content-Type: application/json" -H "Authorization: Bearer \${id_token}" -H "x-api-key: \${apiKey}" -d "\${api_data}" "\${api_url}")
 
 echo "Respuesta de la API: \${api_response}"`}
-          </SyntaxHighlighter>
+              </SyntaxHighlighter>
+            </AccordionDetails>
+          </Accordion>
         </Box>
+      )}
+      <Stack spacing={2} direction='row' justifyContent='center' style={{ margin: '20px' }}>
+        <LoadingButton
+          variant='contained'
+          onClick={handleTestConnection}
+          disabled={loading}
+          loading={loading || apiKeyStore.isLoading}
+        >
+          {loading ? 'Enviando eCF...' : 'Enviar eCF de prueba'}
+        </LoadingButton>
+      </Stack>
+
+      {loading && <CircularProgress size={24} />}
+
+      {response && (
+        <SyntaxHighlighter language='json' style={materialDark}>
+          {response}
+        </SyntaxHighlighter>
       )}
     </Box>
   )

@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 // MUI Imports
 
@@ -30,7 +30,15 @@ import { CodeExamples } from './CodeExamples'
 
 const Stepper = () => {
   // States
-  const [activeStep, setActiveStep] = useState(0)
+  const [activeStep, setActiveStep] = useState(() => {
+    const savedStep = localStorage.getItem('activeStep')
+
+    return savedStep ? parseInt(savedStep, 10) : 0
+  })
+
+  useEffect(() => {
+    localStorage.setItem('activeStep', activeStep.toString())
+  }, [activeStep])
 
   const handleNext = () => {
     setActiveStep(prevActiveStep => prevActiveStep + 1)
