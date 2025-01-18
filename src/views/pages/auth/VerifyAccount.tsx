@@ -1,7 +1,7 @@
 'use client'
 
 // Next Imports
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -42,6 +42,8 @@ const verifySchema = yup.object({
 type VerifyFormData = yup.InferType<typeof verifySchema>
 
 const VerifyAccount = ({ mode }: { mode: Mode }) => {
+  const [resending, setResending] = useState(false)
+
   // Vars
   const darkImg = '/images/pages/auth-v1-mask-dark.png'
   const lightImg = '/images/pages/auth-v1-mask-light.png'
@@ -54,7 +56,8 @@ const VerifyAccount = ({ mode }: { mode: Mode }) => {
     register,
     handleSubmit,
     setValue,
-    formState: { errors, isSubmitting }
+    formState: { errors, isSubmitting },
+    watch
   } = useForm<VerifyFormData>({
     resolver: yupResolver(verifySchema)
   })
@@ -86,6 +89,38 @@ const VerifyAccount = ({ mode }: { mode: Mode }) => {
       }
     } catch (error) {
       console.error('Verification failed:', error)
+    }
+  }
+
+  const handleResendCode = async () => {
+    const email = watch('email') || searchParams.get('email')
+
+    if (!email) {
+      toast.error('Email is required')
+
+      
+return
+    }
+
+    setResending(true)
+    try {
+      const response = await fetch('/api/auth/verify/resend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      })
+
+      if (response.ok) {
+        toast.success('Verification code resent successfully')
+      } else {
+        const data = await response.json()
+
+        toast.error(data.error)
+      }
+    } catch (error) {
+      toast.error('Failed to resend verification code')
+    } finally {
+      setResending(false)
     }
   }
 
@@ -134,6 +169,16 @@ const VerifyAccount = ({ mode }: { mode: Mode }) => {
                 </Link>
               </Typography>
             </form>
+            <Link
+              href='#'
+              onClick={e => {
+                e.preventDefault()
+                handleResendCode()
+              }}
+              className='text-primary hover:underline text-center block mt-4'
+            >
+              {resending ? 'Sending...' : 'Resend verification code'}
+            </Link>
           </div>
         </CardContent>
       </Card>
