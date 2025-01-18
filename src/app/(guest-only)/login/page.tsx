@@ -8,8 +8,8 @@ import Login from '@views/pages/auth/Login'
 import { getServerMode } from '@core/utils/serverHelpers'
 
 export const metadata: Metadata = {
-  title: 'Login',
-  description: 'Login to your account'
+  title: 'Login | eCF MSeller',
+  description: 'Login to your account | Tu plataforma de Facturación Electrónica  DGII República Dominicana'
 }
 
 const LoginPage = () => {
