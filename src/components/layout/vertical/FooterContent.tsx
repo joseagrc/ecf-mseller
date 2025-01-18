@@ -35,7 +35,7 @@ const FooterContent = () => {
           <Link href='https://mseller.app' target='_blank' className='text-primary'>
             Documentación
           </Link>
-          <Link href='https://themeselection.com/support' target='_blank' className='text-primary'>
+          <Link href='https:/mseller.app' target='_blank' className='text-primary'>
             Suporte
           </Link>
         </div>

@@ -79,8 +79,8 @@ const ForgotPasswordV2 = ({ mode }: { mode: Mode }) => {
   // Vars
   const darkImg = '/images/pages/auth-v2-mask-dark.png'
   const lightImg = '/images/pages/auth-v2-mask-light.png'
-  const darkIllustration = '/images/illustrations/auth/v2-forgot-password-dark.png'
-  const lightIllustration = '/images/illustrations/auth/v2-forgot-password-light.png'
+  const darkIllustration = '/images/illustrations/characters/illustration.png'
+  const lightIllustration = '/images/illustrations/characters/illustration.png'
   const borderedDarkIllustration = '/images/illustrations/auth/v2-forgot-password-dark-border.png'
   const borderedLightIllustration = '/images/illustrations/auth/v2-forgot-password-light-border.png'
 

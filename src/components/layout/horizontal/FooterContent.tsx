@@ -35,14 +35,10 @@ const FooterContent = () => {
           <Link href='https:/mseller.app' target='_blank' className='text-primary'>
             More Themes
           </Link>
-          <Link
-            href='https://demos.themeselection.com/marketplace/materio-mui-nextjs-admin-template/documentation'
-            target='_blank'
-            className='text-primary'
-          >
+          <Link href='https:/mseller.app' target='_blank' className='text-primary'>
             Documentation
           </Link>
-          <Link href='https://themeselection.com/support' target='_blank' className='text-primary'>
+          <Link href='https:/mseller.app' target='_blank' className='text-primary'>
             Support
           </Link>
         </div>

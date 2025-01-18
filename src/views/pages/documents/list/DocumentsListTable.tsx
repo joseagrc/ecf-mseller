@@ -186,8 +186,8 @@ const DocumentListTable = () => {
       header: 'Acción',
       cell: ({ row }) => (
         <div className='flex items-center'>
-          <Tooltip title='Re-enviar documento'>
-            <IconButton onClick={() => {}}>
+          <Tooltip title='Re-enviar documento | Se implementará en la próxima versión'>
+            <IconButton onClick={() => {}} disabled>
               <i className='ri-mail-send-fill' />
             </IconButton>
           </Tooltip>

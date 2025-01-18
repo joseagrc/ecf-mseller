@@ -39,6 +39,7 @@ const CertificateTable = () => {
 
       const fileName = `${certificateKey.split('/').pop()}.xml`
       const link = document.createElement('a')
+
       link.href = presignedUrl
       link.setAttribute('download', fileName)
       document.body.appendChild(link)
