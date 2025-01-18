@@ -183,13 +183,14 @@ export const CodeExamples = () => {
 
   const [loading, setLoading] = useState(false)
   const [response, setResponse] = useState('')
-
+  const [apiRequested, setApiRequested] = useState(false)
   const dispatch = useDispatch<AppDispatch>()
   const apiKeyStore = useSelector((state: RootState) => state.apiKeyReducer)
 
   useEffect(() => {
-    if (apiKeyStore.apiKeys.length === 0) {
+    if (apiKeyStore.apiKeys.length === 0 && !apiRequested) {
       dispatch(getApiKeys())
+      setApiRequested(true)
     } else {
       setApiKey(apiKeyStore?.apiKeys?.[0]?.value)
     }
@@ -231,30 +232,64 @@ export const CodeExamples = () => {
     }
   }
 
+  const [expanded, setExpanded] = useState<boolean>(false)
+
+  const handleAccordionChange = (event: React.SyntheticEvent, isExpanded: boolean) => {
+    setExpanded(isExpanded)
+  }
+
   return (
     <Box sx={{ width: '100%' }}>
-      <Box>
-        <Typography variant='h5'> Entornos </Typography>
-        <Typography variant='caption' sx={{ pt: 2 }}>
-          Utilice uno de estos entornos, estos entornos son los mismos que deben ser colocados durante la certificación{' '}
-        </Typography>
-        <Typography variant='h6' sx={{ pt: 2 }}>
-          {' '}
-          Prueba{' '}
-        </Typography>
-        <code>https://ecf.api.mseller.app/TesteCF</code>
-        <Typography variant='h6' sx={{ pt: 2 }}>
-          {' '}
-          Certificación{' '}
-        </Typography>
-        <code>https://ecf.api.mseller.app/CerteCF</code>
-        <Typography variant='h6' sx={{ pt: 2 }}>
-          {' '}
-          Producción{' '}
-        </Typography>
-        <code>https://ecf.api.mseller.app/eCF</code>
-      </Box>
-
+      <Grid container spacing={2}>
+        <Box>
+          <Typography variant='h5'> Entornos </Typography>
+          <Typography variant='caption' sx={{ pt: 2 }}>
+            Utilice uno de estos entornos, estos entornos son los mismos que deben ser colocados durante la
+            certificación{' '}
+          </Typography>
+        </Box>
+        <Grid item xs={12} md={6}>
+          <Box>
+            <Typography variant='h6' sx={{ pt: 2 }}>
+              {' '}
+              Prueba{' '}
+            </Typography>
+            <code>https://ecf.api.mseller.app/TesteCF</code>
+            <Typography variant='h6' sx={{ pt: 2 }}>
+              {' '}
+              Certificación{' '}
+            </Typography>
+            <code>https://ecf.api.mseller.app/CerteCF</code>
+            <Typography variant='h6' sx={{ pt: 2 }}>
+              {' '}
+              Producción{' '}
+            </Typography>
+            <code>https://ecf.api.mseller.app/eCF</code>
+          </Box>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Box>
+            <Typography variant='h6' sx={{ pt: 2 }}>
+              Envío de todos los documentos eCF | POST
+            </Typography>
+            <Typography variant='caption' sx={{ pt: 2 }}>
+              Puede enviar los documentos eCF a través de este recurso incluyendo E32 menores o mayores a 250K
+            </Typography>
+            <code>host/{`{entorno}`}/documentos-ecf</code>
+            <Typography variant='h6' sx={{ pt: 2 }}>
+              Consultar comprobante | GET
+            </Typography>
+            <code>
+              host/{`{entorno}`}/documentos-ecf?ecf={'{No. comprobante electrónico}'}
+            </code>
+            <Typography variant='h6' sx={{ pt: 2 }}>
+              {' '}
+              Producción{' '}
+            </Typography>
+            <code>https://ecf.api.mseller.app/eCF</code>
+          </Box>
+        </Grid>
+      </Grid>
       <Tabs value={value} onChange={handleChange} aria-label='code examples'>
         <Tab label='JavaScript' />
         <Tab label='C#' />
@@ -328,7 +363,7 @@ export const CodeExamples = () => {
       </Box>
       {value === 0 && (
         <Box sx={{ p: 3 }}>
-          <Accordion defaultExpanded={false}>
+          <Accordion expanded={expanded} onChange={handleAccordionChange}>
             <AccordionSummary
               expandIcon={<i className='ri-arrow-up-s-line' />}
               aria-controls='code-content'
@@ -336,17 +371,19 @@ export const CodeExamples = () => {
             >
               <Typography>Ver código de ejemplo</Typography>
             </AccordionSummary>
-            <AccordionDetails>
-              <SyntaxHighlighter language='javascript' style={materialDark}>
-                {jscode(email, password, eNCF, rncEmisor, razonSocialEmisor, direccionEmisor, fechaEmision, apiKey)}
-              </SyntaxHighlighter>
-            </AccordionDetails>
+            {expanded && (
+              <AccordionDetails>
+                <SyntaxHighlighter language='javascript' style={materialDark}>
+                  {jscode(email, password, eNCF, rncEmisor, razonSocialEmisor, direccionEmisor, fechaEmision, apiKey)}
+                </SyntaxHighlighter>
+              </AccordionDetails>
+            )}
           </Accordion>
         </Box>
       )}
       {value === 1 && (
         <Box sx={{ p: 3 }}>
-          <Accordion defaultExpanded={false}>
+          <Accordion expanded={expanded} onChange={handleAccordionChange}>
             <AccordionSummary
               expandIcon={<i className='ri-arrow-up-s-line' />}
               aria-controls='code-content'
@@ -354,17 +391,19 @@ export const CodeExamples = () => {
             >
               <Typography>Ver código de ejemplo</Typography>
             </AccordionSummary>
-            <AccordionDetails>
-              <SyntaxHighlighter language='csharp' style={materialDark}>
-                {ccode}
-              </SyntaxHighlighter>
-            </AccordionDetails>
+            {expanded && (
+              <AccordionDetails>
+                <SyntaxHighlighter language='csharp' style={materialDark}>
+                  {ccode}
+                </SyntaxHighlighter>
+              </AccordionDetails>
+            )}
           </Accordion>
         </Box>
       )}
       {value === 2 && (
         <Box sx={{ p: 3 }}>
-          <Accordion defaultExpanded={false}>
+          <Accordion expanded={expanded} onChange={handleAccordionChange}>
             <AccordionSummary
               expandIcon={<i className='ri-arrow-up-s-line' />}
               aria-controls='code-content'
@@ -372,11 +411,13 @@ export const CodeExamples = () => {
             >
               <Typography>Ver código de ejemplo</Typography>
             </AccordionSummary>
-            <AccordionDetails>
-              <SyntaxHighlighter language='bash' style={materialDark}>
-                {bash(email, password, eNCF, rncEmisor, razonSocialEmisor, direccionEmisor, fechaEmision, apiKey)}
-              </SyntaxHighlighter>
-            </AccordionDetails>
+            {expanded && (
+              <AccordionDetails>
+                <SyntaxHighlighter language='bash' style={materialDark}>
+                  {bash(email, password, eNCF, rncEmisor, razonSocialEmisor, direccionEmisor, fechaEmision, apiKey)}
+                </SyntaxHighlighter>
+              </AccordionDetails>
+            )}
           </Accordion>
         </Box>
       )}

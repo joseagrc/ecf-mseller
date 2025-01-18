@@ -111,8 +111,8 @@ const UserDropdown = () => {
                       <Typography className='font-medium' color='text.primary'>
                         {session.data?.user?.given_name || ''} {session.data?.user.name || ''}
                       </Typography>
-                      <Typography variant='caption'>{session.data.user.email}</Typography>
-                      <Typography variant='caption'>RNC:{session.data.user.rnc}</Typography>
+                      <Typography variant='caption'>{session?.data?.user?.email}</Typography>
+                      <Typography variant='caption'>RNC:{session?.data?.user?.rnc}</Typography>
                     </div>
                   </div>
                   <Divider className='mlb-1' />
@@ -126,7 +126,7 @@ const UserDropdown = () => {
                   </MenuItem>
                   <MenuItem className='gap-3' onClick={e => handleDropdownClose(e)}>
                     <i className='ri-money-dollar-circle-line' />
-                    <Typography color='text.primary'>Plan: {session.data.user.plan}</Typography>
+                    <Typography color='text.primary'>Plan: {session?.data?.user.plan}</Typography>
                   </MenuItem>
                   {/* <MenuItem className='gap-3' onClick={e => handleDropdownClose(e)}>
                     <i className='ri-question-line' />

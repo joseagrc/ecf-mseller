@@ -153,7 +153,7 @@ const ApiKeyListTable = () => {
 
   useEffect(() => {
     dispatch(getApiKeys())
-  }, [dispatch])
+  }, [])
 
   const handleDelete = (apiKeyId: string) => {
     if (window.confirm('Seguro que deseas eliminar esta API key?')) {

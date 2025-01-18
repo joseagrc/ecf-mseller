@@ -48,8 +48,17 @@ const AddApiKeyForm = (props: AddApiKeyFormProps) => {
   }
 
   const onSubmit = async (data: ApiKeyInputType) => {
-    await dispatch(addApiKey(data))
-    handleClose()
+    try {
+      const resultAction = await dispatch(addApiKey(data))
+
+      if (resultAction.meta.requestStatus === 'fulfilled') {
+        handleClose()
+      } else {
+        console.error('Failed to add API key:', resultAction.payload)
+      }
+    } catch (error) {
+      console.error('Failed to add API key:', error)
+    }
   }
 
   const handleReset = () => {
