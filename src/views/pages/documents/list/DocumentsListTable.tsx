@@ -1,5 +1,5 @@
 // React Imports
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 // Next Imports
 
@@ -17,7 +17,7 @@ import TablePagination from '@mui/material/TablePagination'
 
 // Third-party Imports
 import type { RankingInfo } from '@tanstack/match-sorter-utils'
-import type { ColumnDef, FilterFn } from '@tanstack/react-table'
+import type { ColumnDef, FilterFn, PaginationState } from '@tanstack/react-table'
 import {
   flexRender,
   getCoreRowModel,
@@ -99,12 +99,30 @@ const DocumentListTable = () => {
   const [globalFilter, setGlobalFilter] = useState('')
   const [openDialog, setOpenDialog] = useState(false)
   const [dgiiResponses, setDgiiResponses] = useState<string[]>([])
+
   const dispatch = useDispatch<AppDispatch>()
   const documentStore = useSelector((state: RootState) => state.documentReducer)
+
   const [params, setParams] = useState<DocumentsParams>(parameters)
 
+  //const [nextTokens, setNextTokens] = useState<Map<number, string>>(new Map([[0, '']]))
+  const nextTokens = useRef(new Map([[0, '']]))
+
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: parameters.limit
+  })
+
+  const init = useCallback(async () => {
+    const response = await dispatch(getDocuments(params)).unwrap()
+
+    console.log('response', response)
+    nextTokens.current.set(1, response.nextToken)
+    console.log('nextTokens.current', nextTokens.current)
+  }, [dispatch, params])
+
   useEffect(() => {
-    dispatch(getDocuments(params))
+    init()
   }, [])
 
   const handleOpenDialog = (responses: string[]) => {
@@ -205,10 +223,9 @@ const DocumentListTable = () => {
   const table = useReactTable({
     data: documentStore.data.items,
     columns: columns(),
-    filterFns: {
-      fuzzy: fuzzyFilter
-    },
+
     state: {
+      pagination,
       rowSelection,
       globalFilter
     },
@@ -217,9 +234,7 @@ const DocumentListTable = () => {
         pageSize: parameters.limit
       }
     },
-    enableRowSelection: true, //enable row selection for all rows
-    // enableRowSelection: row => row.original.age > 18, // or enable row selection conditionally per row
-    globalFilterFn: fuzzyFilter,
+    manualPagination: true,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
     onGlobalFilterChange: setGlobalFilter,
@@ -228,17 +243,46 @@ const DocumentListTable = () => {
     getPaginationRowModel: getPaginationRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    getFacetedMinMaxValues: getFacetedMinMaxValues()
+    getFacetedMinMaxValues: getFacetedMinMaxValues(),
+    filterFns: { fuzzy: fuzzyFilter }
   })
 
   const onFilterChange = (value: DocumentsFilterValues) => {
-    console.log(value)
     setParams({ ...params, ...value })
     dispatch(getDocuments({ ...params, ...value }))
   }
 
-  
-return (
+  const handlePageChange = useCallback(
+    async (_: any, newPage: number) => {
+      const pageDirection = newPage > pagination.pageIndex ? 'next' : 'prev'
+
+      const currentToken = nextTokens.current.get(newPage)
+
+      try {
+        const response = await dispatch(
+          getDocuments({
+            ...params,
+            nextToken: currentToken || ''
+          })
+        ).unwrap()
+
+        // Store new nextToken if available
+        if (response.nextToken && pageDirection === 'next') {
+          nextTokens.current.set(newPage + 1, response.nextToken)
+        }
+        setPagination({
+          pageIndex: newPage,
+          pageSize: pagination.pageSize
+        })
+        table.setPageIndex(newPage)
+      } catch (error) {
+        console.error('Error changing page:', error)
+      }
+    },
+    [nextTokens, dispatch, pagination.pageIndex, pagination.pageSize, params, table]
+  )
+
+  return (
     <>
       <AddApiKeyDrawer />
       <Card>
@@ -318,13 +362,11 @@ return (
           className='border-bs'
           count={documentStore.data.metadata?.totalItems || 0}
           rowsPerPage={documentStore.data.metadata?.itemsPerPage || 0}
-          page={documentStore.data.metadata?.currentPage || 0}
+          page={pagination.pageIndex}
           SelectProps={{
             inputProps: { 'aria-label': 'rows per page' }
           }}
-          onPageChange={(_, page) => {
-            table.setPageIndex(page)
-          }}
+          onPageChange={handlePageChange}
           onRowsPerPageChange={e => table.setPageSize(Number(e.target.value))}
         />
       </Card>

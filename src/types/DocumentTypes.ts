@@ -23,6 +23,7 @@ export interface Metadata {
 export interface DocumentType {
   items: DocumentItem[]
   metadata: Metadata
+  nextToken: string
 }
 
 export interface DocumentSliceType {

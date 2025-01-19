@@ -11,8 +11,8 @@ import Select from '@mui/material/Select'
 import type { TextFieldProps } from '@mui/material/TextField'
 import { format } from 'date-fns'
 
-import type { DocumentsFilterValues } from '@/types/DocumentTypes'
 import AppReactDatepicker from '@/libs/styles/AppReactDatepicker'
+import type { DocumentsFilterValues } from '@/types/DocumentTypes'
 
 // Type Imports
 
@@ -62,7 +62,7 @@ export const parameters = {
   internalTrackId: '',
   showData: false,
   environment: 'TesteCF',
-  limit: 10,
+  limit: 2,
   ecf: ''
 }
 
@@ -108,15 +108,7 @@ const TableFilters = ({ onFilterChange }: TableFiltersProps) => {
   }
 
   const handleReset = () => {
-    const resetFilters = {
-      fromDate: null,
-      toDate: null,
-      documentType: '',
-      status: '',
-      internalTrackId: '',
-      showData: false,
-      environment: 'TesteCF'
-    }
+    const resetFilters = { ...parameters }
 
     setFilters(resetFilters)
     setStartDate(null)

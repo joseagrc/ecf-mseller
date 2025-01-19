@@ -8,6 +8,7 @@ import axiosClient from '@/utils/axiosClient'
 const initialState: DocumentSliceType = {
   data: {
     items: [],
+    nextToken: '',
     metadata: {
       totalItems: 0,
       itemsPerPage: 0,
@@ -50,6 +51,7 @@ export const documentSlice = createSlice({
       state.error = action.error.message
     })
     builder.addCase(getDocuments.fulfilled, (state, action: PayloadAction<DocumentType>) => {
+      //state.data = { ...state.data, ...action.payload }
       state.data = action.payload
       state.isLoading = false
     })
