@@ -116,14 +116,12 @@ const DocumentListTable = () => {
   const init = useCallback(async () => {
     const response = await dispatch(getDocuments(params)).unwrap()
 
-    console.log('response', response)
     nextTokens.current.set(1, response.nextToken)
-    console.log('nextTokens.current', nextTokens.current)
   }, [dispatch, params])
 
   useEffect(() => {
     init()
-  }, [])
+  }, [init])
 
   const handleOpenDialog = (responses: string[]) => {
     setDgiiResponses(responses)
@@ -200,11 +198,11 @@ const DocumentListTable = () => {
       header: 'Acción',
       cell: ({ row }) => (
         <div className='flex items-center'>
-          <Tooltip title='Re-enviar documento | Se implementará en la próxima versión'>
-            <IconButton onClick={() => {}} disabled>
+          {/* <Tooltip title='Re-enviar documento | Se implementará en la próxima versión'>
+            <IconButton onClick={() => {}}>
               <i className='ri-mail-send-fill' />
             </IconButton>
-          </Tooltip>
+          </Tooltip> */}
           <Tooltip title='Descargar XML'>
             <IconButton onClick={() => handleDownload(row.id, row.original.signedXml)}>
               {downloadingIds.includes(row.id) ? <CircularProgress size={20} /> : <i className='mdi-file-xml-box' />}
