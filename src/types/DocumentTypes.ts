@@ -11,6 +11,7 @@ export interface DocumentItem {
   createdAt: number
   signedXml: string
   customerId: string
+  qr_url: string
 }
 
 export interface Metadata {

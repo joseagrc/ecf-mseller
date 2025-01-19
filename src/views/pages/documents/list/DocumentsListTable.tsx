@@ -203,6 +203,13 @@ const DocumentListTable = () => {
               <i className='ri-mail-send-fill' />
             </IconButton>
           </Tooltip> */}
+          <Tooltip title='Verificación e-NCF'>
+            <span>
+              <IconButton onClick={() => window.open(row.original.qr_url, '_blank')} disabled={!row.original.qr_url}>
+                <i className='ri-receipt-line' />
+              </IconButton>
+            </span>
+          </Tooltip>
           <Tooltip title='Descargar XML'>
             <IconButton onClick={() => handleDownload(row.id, row.original.signedXml)}>
               {downloadingIds.includes(row.id) ? <CircularProgress size={20} /> : <i className='mdi-file-xml-box' />}

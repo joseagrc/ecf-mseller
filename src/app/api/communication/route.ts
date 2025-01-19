@@ -14,8 +14,10 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await req.json()
+
+    const env = ((await req.headers.get('x-env-name')) || 'TesteCF') as string
     const apiKey = (await req.headers.get('x-api-key')) as string
-    const path = `/TesteCF/documentos-ecf`
+    const path = `/${env}/documentos-ecf`
 
     //for new session after upload the certificate the secretId get attached to the access token, in order to stablish the communication
     // we need to refresh the access token and perform the request, custom:secretId should be available in the new token

@@ -13,6 +13,7 @@ import { format } from 'date-fns'
 
 import AppReactDatepicker from '@/libs/styles/AppReactDatepicker'
 import type { DocumentsFilterValues } from '@/types/DocumentTypes'
+import { environments } from '@/utils/environments'
 
 // Type Imports
 
@@ -48,12 +49,6 @@ const statusOptions = [
   'Error'
 ]
 
-const environments = [
-  { label: 'Prueba | TesteCF', value: 'TesteCF' },
-  { label: 'Certificación | CerteCF', value: 'CerteCF' },
-  { label: 'Producción | eCF', value: 'eCF' }
-]
-
 export const parameters = {
   fromDate: null,
   toDate: null,
@@ -62,7 +57,7 @@ export const parameters = {
   internalTrackId: '',
   showData: false,
   environment: 'TesteCF',
-  limit: 2,
+  limit: 10,
   ecf: ''
 }
 
