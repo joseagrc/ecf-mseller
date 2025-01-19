@@ -36,9 +36,14 @@ export interface DocumentsParams {
   documentType?: string
   status?: string
   internalTrackId?: string
-  fromDate?: number
-  toDate?: number
+  fromDate?: number | null | undefined
+  toDate?: number | null | undefined
   limit?: number
   nextToken?: string
   showData?: boolean
+  ecf?: string
+}
+
+export interface DocumentsFilterValues extends DocumentsParams {
+  environment: string
 }

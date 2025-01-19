@@ -35,7 +35,9 @@ import classnames from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
 
 import {
+  CardHeader,
   CircularProgress,
+  Divider,
   Paper,
   Table,
   TableBody,
@@ -47,7 +49,7 @@ import {
   Typography
 } from '@mui/material'
 
-import type { DocumentItem } from '@/types/DocumentTypes'
+import type { DocumentItem, DocumentsFilterValues, DocumentsParams } from '@/types/DocumentTypes'
 
 import type { ThemeColor } from '@core/types'
 
@@ -61,6 +63,7 @@ import type { AppDispatch, RootState } from '@/redux-store'
 import { getDocuments } from '@/redux-store/slices/documentSlice'
 import tableStyles from '@core/styles/table.module.css'
 import AddApiKeyDrawer from './AddApiKeyDrawer'
+import TableFilters, { parameters } from './TableFilters'
 
 declare module '@tanstack/table-core' {
   interface FilterFns {
@@ -98,14 +101,7 @@ const DocumentListTable = () => {
   const [dgiiResponses, setDgiiResponses] = useState<string[]>([])
   const dispatch = useDispatch<AppDispatch>()
   const documentStore = useSelector((state: RootState) => state.documentReducer)
-  const pageSize = 10
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const params = {
-    // documentType: 'Factura de Crédito Fiscal Electrónico',
-
-    // status: 'Error',
-    limit: pageSize
-  }
+  const [params, setParams] = useState<DocumentsParams>(parameters)
 
   useEffect(() => {
     dispatch(getDocuments(params))
@@ -218,7 +214,7 @@ const DocumentListTable = () => {
     },
     initialState: {
       pagination: {
-        pageSize: pageSize
+        pageSize: parameters.limit
       }
     },
     enableRowSelection: true, //enable row selection for all rows
@@ -235,15 +231,25 @@ const DocumentListTable = () => {
     getFacetedMinMaxValues: getFacetedMinMaxValues()
   })
 
-  return (
+  const onFilterChange = (value: DocumentsFilterValues) => {
+    console.log(value)
+    setParams({ ...params, ...value })
+    dispatch(getDocuments({ ...params, ...value }))
+  }
+
+  
+return (
     <>
       <AddApiKeyDrawer />
       <Card>
+        <CardHeader title='Filtros de Documentos' />
+        <TableFilters onFilterChange={onFilterChange} />
+        <Divider />
         <CardContent className='flex justify-between max-sm:flex-col sm:items-center gap-4'>
           <Typography variant='h5'>Documentos</Typography>
           <Button
-            variant='contained'
-            color='secondary'
+            variant='outlined'
+            color='primary'
             startIcon={<i className='mdi-reload' />}
             onClick={() => dispatch(getDocuments(params))}
           >
@@ -307,7 +313,7 @@ const DocumentListTable = () => {
           </table>
         </div>
         <TablePagination
-          rowsPerPageOptions={[pageSize]}
+          rowsPerPageOptions={[parameters.limit]}
           component='div'
           className='border-bs'
           count={documentStore.data.metadata?.totalItems || 0}

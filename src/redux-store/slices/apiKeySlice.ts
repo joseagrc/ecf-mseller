@@ -4,6 +4,8 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
 import { toast } from 'react-toastify'
 
+import axiosClient from '@/utils/axiosClient'
+
 import type { ApiKeyInputType, ApiKeySliceType, ApiKeyType } from '@/types/ApiKeyTypes'
 
 const initialState: ApiKeySliceType = {
@@ -18,52 +20,34 @@ export const addApiKey = createAsyncThunk(
   'apiKey/addApiKey',
   async (apiKey: ApiKeyInputType, { dispatch, rejectWithValue }) => {
     try {
-      const response = await fetch('/api/api-keys', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(apiKey)
-      })
+      const { data } = await axiosClient.post('/api/api-keys', apiKey)
 
-      if (response.ok) {
-        const result = await response.json()
+      toast.success('API Key agregada exitosamente')
+      await dispatch(getApiKeys())
 
-        toast.success('API Key agregada exitosamente')
-        await dispatch(getApiKeys())
-
-        return result
-      } else {
-        const errorResult = await response.json()
-
-        throw new Error(errorResult.message || 'Failed to add API Key')
-      }
+      return data
     } catch (error: any) {
-      toast.error(`Error: ${error?.message}`)
+      const message = error.response?.data?.message || 'Failed to add API Key'
 
-      
-return rejectWithValue(error.message)
+      toast.error(`Error: ${message}`)
+
+      return rejectWithValue(message)
     }
   }
 )
 
-export const getApiKeys = createAsyncThunk('apiKey/getApiKeys', async () => {
-  const response = await fetch('/api/api-keys', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
+export const getApiKeys = createAsyncThunk('apiKey/getApiKeys', async (_, { rejectWithValue }) => {
+  try {
+    const { data } = await axiosClient.get('/api/api-keys')
 
-  if (!response.ok) {
-    const result = await response.json()
+    
+return data
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'Failed to fetch API Keys'
 
-    return { ...result }
+    
+return rejectWithValue(message)
   }
-
-  const result = (await response.json()) as ApiKeyType[]
-
-  return result
 })
 
 export const deleteApiKey = createAsyncThunk('apiKey/deleteApiKey', async (apiKeyId: string, { dispatch }) => {

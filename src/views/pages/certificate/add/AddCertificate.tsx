@@ -21,6 +21,7 @@ import { Grid, Link, styled, type BoxProps } from '@mui/material'
 
 import AppReactDatepicker from '@/libs/styles/AppReactDatepicker'
 import AppReactDropzone from '@/libs/styles/AppReactDropzone'
+import axiosClient from '@/utils/axiosClient'
 import CustomAvatar from '@core/components/mui/Avatar'
 
 // Styled Component Imports
@@ -101,26 +102,19 @@ const AddCertificate = (props: AddCertificateProps) => {
 
       const formattedDate = expirationDate ? new Date(expirationDate).toISOString().split('T')[0] : null
 
-      const response = await fetch('/api/certificate', {
-        method: 'POST',
+      await axiosClient.post('/api/certificate', {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
+        body: {
           certificatePassword: password,
           expirationDate: formattedDate,
           certificate: {
             content: base64,
             filename: files[0].name
           }
-        })
+        }
       })
-
-      if (!response.ok) {
-        const data = await response.json()
-
-        throw new Error(data.error)
-      }
 
       toast.success('Certificado agregado exitosamente')
       handleRemoveFile()
@@ -168,6 +162,12 @@ const AddCertificate = (props: AddCertificateProps) => {
               onChange={(date: Date | null) => setExpirationDate(date)}
               customInput={<TextField margin='normal' size='small' fullWidth label='Fecha de vencimiento' />}
             />
+          </Grid>
+          <Grid item xs={12}>
+            <Typography variant='body2' color='text.secondary'>
+              Nota: La fecha de vencimiento es opcional, solo se utilizará para notificar a los clientes de cuando se
+              aproxima el vencimiento del certificado.
+            </Typography>
           </Grid>
         </Grid>
       </div>

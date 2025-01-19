@@ -489,28 +489,41 @@ export const StyledReactDatePicker = styled(Box)<BoxProps>(({ theme }) => {
   }
 })
 
+// const AppReactDatepicker = (props: Props) => {
+//   // Props
+//   const { boxProps, ...rest } = props
+
+//   // Default date is one year later
+//   const defaultDate = new Date()
+
+//   defaultDate.setFullYear(defaultDate.getFullYear() + 1)
+
+//   const handleCalendarOpen = (setSelected: any) => {
+//     setSelected(defaultDate)
+//   }
+
+//   return (
+//     <StyledReactDatePicker {...boxProps}>
+//       <ReactDatePickerComponent
+//         popperPlacement='bottom-start'
+//         selected={defaultDate}
+//         minDate={new Date()}
+//         onCalendarOpen={() => handleCalendarOpen(rest.onChange)}
+//         {...rest}
+//       />
+//     </StyledReactDatePicker>
+//   )
+// }
+
+// export default AppReactDatepicker
+
 const AppReactDatepicker = (props: Props) => {
   // Props
   const { boxProps, ...rest } = props
 
-  // Default date is one year later
-  const defaultDate = new Date()
-
-  defaultDate.setFullYear(defaultDate.getFullYear() + 1)
-
-  const handleCalendarOpen = (setSelected: any) => {
-    setSelected(defaultDate)
-  }
-
   return (
     <StyledReactDatePicker {...boxProps}>
-      <ReactDatePickerComponent
-        popperPlacement='bottom-start'
-        selected={defaultDate}
-        minDate={new Date()}
-        onCalendarOpen={() => handleCalendarOpen(rest.onChange)}
-        {...rest}
-      />
+      <ReactDatePickerComponent popperPlacement='bottom-start' {...rest} />
     </StyledReactDatePicker>
   )
 }

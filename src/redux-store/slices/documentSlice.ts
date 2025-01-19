@@ -3,6 +3,7 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
 import type { DocumentSliceType, DocumentsParams, DocumentType } from '@/types/DocumentTypes'
+import axiosClient from '@/utils/axiosClient'
 
 const initialState: DocumentSliceType = {
   data: {
@@ -21,20 +22,13 @@ const initialState: DocumentSliceType = {
 
 export const getDocuments = createAsyncThunk('document/getGetDocuments', async (params: DocumentsParams) => {
   const query = new URLSearchParams(params as any).toString()
-  const response = await fetch(`/api/documents?${query}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
+  const response = await axiosClient.get(`/api/documents?${query}`)
 
-  if (!response.ok) {
-    const result = await response.json()
-
-    return { ...result }
+  if (response.status !== 200) {
+    return { ...response.data }
   }
 
-  const result = (await response.json()) as DocumentType
+  const result = response.data as DocumentType
 
   return result
 })

@@ -15,7 +15,8 @@ export async function GET(request: Request) {
 
     const url = new URL(request.url)
     const params = url.searchParams.toString()
-    const path = `/TesteCF/customer/documents?${params}`
+    const env = url.searchParams.get('environment')
+    const path = `/${env}/customer/documents?${params}`
 
     const response = await fetch((process.env.AWS_API_GATEWAY_URL + path) as string, {
       method: 'GET',
