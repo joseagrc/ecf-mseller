@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 import { getServerSession } from 'next-auth'
 
-import { authOptions } from '@/libs/auth'
+import { authOptions, refreshAccessToken } from '@/libs/auth'
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,11 +17,19 @@ export async function POST(req: NextRequest) {
     const apiKey = (await req.headers.get('x-api-key')) as string
     const path = `/TesteCF/documentos-ecf`
 
+    //for new session after upload the certificate the secretId get attached to the access token, in order to stablish the communication
+    // we need to refresh the access token and perform the request, custom:secretId should be available in the new token
+    const newToken = await refreshAccessToken(session)
+
+    if (newToken.error) {
+      return NextResponse.json({ error: newToken.error }, { status: 401 })
+    }
+
     const response = await fetch((process.env.AWS_API_GATEWAY_URL + path) as string, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.idToken}`,
+        Authorization: `Bearer ${newToken.idToken}`,
         'x-api-key': apiKey
       },
       body: JSON.stringify(data)

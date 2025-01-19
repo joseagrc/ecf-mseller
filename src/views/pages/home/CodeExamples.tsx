@@ -146,7 +146,12 @@ const makeApiRequest = async ({
     return apiResult
   } catch (error: any) {
     console.error('Error:', error)
-    toast.error(error?.message || 'Error al realizar la solicitud a la API')
+
+    if (error?.message.includes('Invalid password?')) {
+      toast.error('La clave del certificado es inválida')
+    } else {
+      toast.error(error?.message || 'Error al realizar la solicitud a la API')
+    }
   }
 }
 

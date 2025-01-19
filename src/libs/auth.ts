@@ -203,9 +203,9 @@ export const authOptions: NextAuthOptions = {
 
       return true
     },
-    async jwt({ token, user }: any) {
+    async jwt({ token, user, session }: any) {
       if (process.env.NODE_ENV === 'development') {
-        console.log('TOKEN VALUE', token)
+        console.log('TOKEN VALUE', { token, user, session })
       }
 
       if (user) {
@@ -223,19 +223,13 @@ export const authOptions: NextAuthOptions = {
         // Decode idToken to get user information
       }
 
-      // if (Date.now() < token.accessTokenExpires) {
-      //   return token
-      // }
-      refreshAccessToken(token)
+      if (Date.now() < token.accessTokenExpires) {
+        return token
+      }
 
-      //return refreshAccessToken(token)
-      return token
+      return refreshAccessToken(token)
 
-      // Error refreshing access token {
-      //   code: 'BadRequest',
-      //   message: 'The server did not understand the operation that was requested.',
-      //   type: 'client'
-      // }
+      //return token
     },
     async session({ session, token }) {
       if (session.user) {
@@ -244,7 +238,6 @@ export const authOptions: NextAuthOptions = {
 
       const decodedInfo = getUserFromToken(token, session?.user?.email || '')
 
-      console.log('session token', { session, token })
       session.accessToken = token.accessToken as string
       session.idToken = token.idToken as string
       session.refreshToken = token.refreshToken as string
@@ -253,7 +246,8 @@ export const authOptions: NextAuthOptions = {
         ...decodedInfo.userProfile
       }
 
-      return session
+      
+return session
     }
   },
   events: {
@@ -268,48 +262,49 @@ export async function refreshAccessToken(token: any) {
     const client = new CognitoIdentityProviderClient({
       region: process.env.AWS_REGION
     })
+    const decodedInfo = getUserFromToken(token, token.email || '')
+    const hash = calculateSecretHash(decodedInfo.userProfile.username || '')
+
     const params = {
       AuthFlow: AuthFlowType.REFRESH_TOKEN_AUTH,
       ClientId: process.env.COGNITO_CLIENT_ID,
       AuthParameters: {
         REFRESH_TOKEN: token.refreshToken,
-        SECRET_HASH: calculateSecretHash(token.email)
+        SECRET_HASH: hash
       }
     }
 
     const command = new InitiateAuthCommand(params)
     const response = await client.send(command)
 
-    console.log('refreshAccessToken Response:', response)
+    const refreshedTokens = await response.AuthenticationResult
 
-    // const refreshedTokens = await response.json()
+    if (response?.['$metadata'].httpStatusCode === 401) {
+      console.error('BadRequest or Unauthorized error:', refreshedTokens)
 
-    // if (response.status === 401) {
-    //   console.error('BadRequest or Unauthorized error:', refreshedTokens)
+      return {
+        ...token,
+        error: 'RefreshAccessTokenError',
+        accessToken: null,
+        accessTokenExpires: 0,
+        idToken: null,
+        refreshToken: null,
+        userProfile: null
+      }
+    }
 
-    //   return {
-    //     ...token,
-    //     error: 'RefreshAccessTokenError',
-    //     accessToken: null,
-    //     accessTokenExpires: 0,
-    //     idToken: null,
-    //     refreshToken: null,
-    //     userProfile: null
-    //   }
-    // }
+    if (response?.['$metadata']?.httpStatusCode !== 200) {
+      throw refreshedTokens
+    }
 
-    // if (!response.ok) {
-    //   throw refreshedTokens
-    // }
-
-    // return {
-    //   ...token,
-    //   accessToken: refreshedTokens.access_token,
-    //   accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
-    //   idToken: refreshedTokens.id_token ?? token.idToken,
-    //   refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
-    //   userProfile: token.userProfile // ** Retain userProfile information
-    // }
+    return {
+      ...token,
+      accessToken: refreshedTokens?.AccessToken,
+      accessTokenExpires: Date.now() + (refreshedTokens?.ExpiresIn || 1) * 1000,
+      idToken: refreshedTokens?.IdToken ?? token.idToken,
+      refreshToken: token.refreshToken,
+      userProfile: token.userProfile // ** Retain userProfile information
+    }
   } catch (error) {
     console.error('Error refreshing access token', error)
 
@@ -331,6 +326,7 @@ interface AuthUser {
   idToken: string | undefined
   refreshToken: string | undefined
   userProfile: {
+    username?: string
     givenName?: string
     familyName?: string
     email?: string
@@ -353,6 +349,7 @@ const getUserFromToken = (authResult: any, email?: string): AuthUser => {
     idToken: authResult.idToken,
     refreshToken: authResult.refreshToken,
     userProfile: {
+      username: decodedToken['cognito:username'],
       givenName: decodedToken?.given_name,
       familyName: decodedToken?.family_name,
       email: decodedToken?.email,

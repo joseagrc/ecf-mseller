@@ -65,7 +65,10 @@ const UserDropdown = () => {
   }
   const session = useSession() as any
 
-  console.log('sessionsessionsessionsessionsession', session)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('sessionsessionsessionsessionsession', session)
+  }
+
   const handleUserLogout = async () => {
     await signOut({ callbackUrl: '/login' })
   }

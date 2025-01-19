@@ -31,13 +31,13 @@ import { CodeExamples } from './CodeExamples'
 const Stepper = () => {
   // States
   const [activeStep, setActiveStep] = useState(() => {
-    const savedStep = localStorage.getItem('activeStep')
+    const savedStep = (typeof window !== 'undefined' && localStorage.getItem('activeStep')) || '0'
 
     return savedStep ? parseInt(savedStep, 10) : 0
   })
 
   useEffect(() => {
-    localStorage.setItem('activeStep', activeStep.toString())
+    typeof window !== 'undefined' && localStorage.setItem('activeStep', activeStep.toString())
   }, [activeStep])
 
   const handleNext = () => {
