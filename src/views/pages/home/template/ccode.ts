@@ -1,4 +1,13 @@
-export const ccode = `using System;
+export const ccode = (
+  email: string,
+  password: string,
+  eNCF: string,
+  rncEmisor: string,
+  razonSocialEmisor: string,
+  direccionEmisor: string,
+  fechaEmision: string,
+  apiKey: string
+) => `using System;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,7 +17,7 @@ public class ApiClient
 {
     private static readonly HttpClient client = new HttpClient();
 
-    public static async Task MakeApiRequest(string rncEmisor, string razonSocialEmisor, string direccionEmisor, string fechaEmision, string apiKey, string email, string password, string eNCF)
+    public static async Task MakeApiRequest()
     {
         var host = "https://ecf.api.mseller.app";
         var loginUrl = $"{host}/customer/authentication";
@@ -16,8 +25,8 @@ public class ApiClient
 
         var loginData = new
         {
-            email = email,
-            password = password
+            email = "${email}",
+            password = "${password}"
         };
 
         try
@@ -34,7 +43,7 @@ public class ApiClient
             var idToken = loginResult.idToken;
 
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", idToken);
-            client.DefaultRequestHeaders.Add("x-api-key", apiKey);
+            client.DefaultRequestHeaders.Add("x-api-key", "${apiKey}");
 
             var apiContent = new StringContent(JsonConvert.SerializeObject(new
             {
@@ -46,7 +55,7 @@ public class ApiClient
                         IdDoc = new
                         {
                             TipoeCF = "31",
-                            eNCF = eNCF,
+                            eNCF = "${eNCF}",
                             FechaVencimientoSecuencia = "31-12-2026",
                             IndicadorEnvioDiferido = "1",
                             IndicadorMontoGravado = "0",
@@ -57,10 +66,10 @@ public class ApiClient
                         },
                         Emisor = new
                         {
-                            RNCEmisor = rncEmisor,
-                            RazonSocialEmisor = razonSocialEmisor,
-                            DireccionEmisor = direccionEmisor,
-                            FechaEmision = fechaEmision
+                            RNCEmisor = "${rncEmisor}",
+                            RazonSocialEmisor = "${razonSocialEmisor}",
+                            DireccionEmisor = "${direccionEmisor}",
+                            FechaEmision = "${fechaEmision}"
                         },
                         Comprador = new
                         {

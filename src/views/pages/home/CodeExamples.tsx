@@ -1,3 +1,4 @@
+'use client'
 import { useEffect, useState } from 'react'
 
 import { LoadingButton } from '@mui/lab'
@@ -155,13 +156,38 @@ const makeApiRequest = async ({
   }
 }
 
+interface FormValues {
+  email: string
+  password: string
+  eNCF: string
+  rncEmisor: string
+  razonSocialEmisor: string
+  direccionEmisor: string
+  fechaEmision: string
+  apiKey: string
+}
+
 export const CodeExamples = () => {
   const [value, setValue] = useState(0)
   const session = useSession() as any
 
-  const [rncEmisor, setRncEmisor] = useState('12345678')
-  const [razonSocialEmisor, setRazonSocialEmisor] = useState('Tu Negocio')
-  const [direccionEmisor, setDireccionEmisor] = useState('DireccionEmisor1')
+  const [formValues, setFormValues] = useState<FormValues>({
+    email: '',
+    password: '',
+    eNCF: '',
+    rncEmisor: '',
+    razonSocialEmisor: '',
+    direccionEmisor: '',
+    fechaEmision: '',
+    apiKey: ''
+  })
+
+  const handleInputChange = (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFormValues(prev => ({
+      ...prev,
+      [field]: event.target.value
+    }))
+  }
 
   const getTodayDate = () => {
     const today = new Date()
@@ -171,10 +197,6 @@ export const CodeExamples = () => {
 
     return `${day}-${month}-${year}`
   }
-  const [fechaEmision, setFechaEmision] = useState(getTodayDate())
-  const [apiKey, setApiKey] = useState('your-api-key')
-  const [email, setEmail] = useState('user@example.com')
-  const [password, setPassword] = useState('')
 
   //const [eNCF, setENCF] = useState('E310435300215')
   const generateRandomENCF = () => {
@@ -183,8 +205,6 @@ export const CodeExamples = () => {
 
     return `${prefix}${randomNumbers}`
   }
-
-  const [eNCF, setENCF] = useState(generateRandomENCF())
 
   const [loading, setLoading] = useState(false)
   const [response, setResponse] = useState('')
@@ -197,16 +217,26 @@ export const CodeExamples = () => {
       dispatch(getApiKeys())
       setApiRequested(true)
     } else {
-      setApiKey(apiKeyStore?.apiKeys?.[0]?.value)
+      if (apiKeyStore?.apiKeys?.[0]?.value) {
+        setFormValues(prev => ({
+          ...prev,
+          apiKey: apiKeyStore?.apiKeys?.[0]?.value
+        }))
+      }
     }
   }, [apiKeyStore, dispatch])
 
   useEffect(() => {
     if (session.data) {
-      setRncEmisor(session.data?.user.rnc || '130359334')
-      setRazonSocialEmisor(session.data?.user.businessName || 'Tu Negocio')
-      setEmail(session.data?.user?.email || 'Tu correo electrónico')
-      setDireccionEmisor(session.data?.direccion || 'DireccionEmisor1')
+      setFormValues(prev => ({
+        ...prev,
+        rncEmisor: session.data?.user.rnc || '130359334',
+        razonSocialEmisor: session.data?.user.businessName || 'Tu Negocio',
+        email: session.data?.user?.email || 'Tu correo electrónico',
+        direccionEmisor: session.data?.direccion || 'DireccionEmisor1',
+        fechaEmision: getTodayDate(),
+        eNCF: generateRandomENCF()
+      }))
     }
   }, [session.data])
 
@@ -218,14 +248,14 @@ export const CodeExamples = () => {
     setLoading(true)
     try {
       const result = await makeApiRequest({
-        rncEmisor,
-        razonSocialEmisor,
-        direccionEmisor,
-        fechaEmision,
-        apiKey,
-        email,
-        password,
-        eNCF
+        rncEmisor: formValues.rncEmisor,
+        razonSocialEmisor: formValues.razonSocialEmisor,
+        direccionEmisor: formValues.direccionEmisor,
+        fechaEmision: formValues.fechaEmision,
+        apiKey: formValues.apiKey,
+        email: formValues.email,
+        password: formValues.password,
+        eNCF: formValues.eNCF
       })
 
       console.log('Result:', result)
@@ -305,8 +335,8 @@ export const CodeExamples = () => {
           <Grid item xs={12} md={6}>
             <TextField
               label='RNC Emisor'
-              value={rncEmisor}
-              onChange={e => setRncEmisor(e.target.value)}
+              value={formValues.rncEmisor}
+              onChange={handleInputChange('rncEmisor')}
               fullWidth
               margin='normal'
             />
@@ -314,8 +344,8 @@ export const CodeExamples = () => {
           <Grid item xs={12} md={6}>
             <TextField
               label='Razon Social Emisor'
-              value={razonSocialEmisor}
-              onChange={e => setRazonSocialEmisor(e.target.value)}
+              value={formValues.razonSocialEmisor}
+              onChange={handleInputChange('razonSocialEmisor')}
               fullWidth
               margin='normal'
             />
@@ -323,8 +353,8 @@ export const CodeExamples = () => {
           <Grid item xs={12} md={6}>
             <TextField
               label='Direccion Emisor'
-              value={direccionEmisor}
-              onChange={e => setDireccionEmisor(e.target.value)}
+              value={formValues.direccionEmisor}
+              onChange={handleInputChange('direccionEmisor')}
               fullWidth
               margin='normal'
             />
@@ -332,8 +362,8 @@ export const CodeExamples = () => {
           <Grid item xs={12} md={6}>
             <TextField
               label='Fecha Emision'
-              value={fechaEmision}
-              onChange={e => setFechaEmision(e.target.value)}
+              value={formValues.fechaEmision}
+              onChange={handleInputChange('fechaEmision')}
               fullWidth
               margin='normal'
             />
@@ -341,28 +371,40 @@ export const CodeExamples = () => {
           <Grid item xs={12} md={6}>
             <TextField
               label='API Key'
-              value={apiKey}
+              value={formValues.apiKey}
               disabled={apiKeyStore.isLoading}
-              onChange={e => setApiKey(e.target.value)}
+              onChange={handleInputChange('apiKey')}
               fullWidth
               margin='normal'
             />
           </Grid>
           <Grid item xs={12} md={6}>
-            <TextField label='Email' value={email} onChange={e => setEmail(e.target.value)} fullWidth margin='normal' />
+            <TextField
+              label='Email'
+              value={formValues.email}
+              onChange={handleInputChange('email')}
+              fullWidth
+              margin='normal'
+            />
           </Grid>
           <Grid item xs={12} md={6}>
             <TextField
               label='Password'
               type='password'
-              value={password}
-              onChange={e => setPassword(e.target.value)}
+              value={formValues.password}
+              onChange={handleInputChange('password')}
               fullWidth
               margin='normal'
             />
           </Grid>
           <Grid item xs={12} md={6}>
-            <TextField label='eNCF' value={eNCF} onChange={e => setENCF(e.target.value)} fullWidth margin='normal' />
+            <TextField
+              label='eNCF'
+              value={formValues.eNCF}
+              onChange={handleInputChange('eNCF')}
+              fullWidth
+              margin='normal'
+            />
           </Grid>
         </Grid>
       </Box>
@@ -379,7 +421,16 @@ export const CodeExamples = () => {
             {expanded && (
               <AccordionDetails>
                 <SyntaxHighlighter language='javascript' style={materialDark}>
-                  {jscode(email, password, eNCF, rncEmisor, razonSocialEmisor, direccionEmisor, fechaEmision, apiKey)}
+                  {jscode(
+                    formValues.email,
+                    formValues.password,
+                    formValues.eNCF,
+                    formValues.rncEmisor,
+                    formValues.razonSocialEmisor,
+                    formValues.direccionEmisor,
+                    formValues.fechaEmision,
+                    formValues.apiKey
+                  )}
                 </SyntaxHighlighter>
               </AccordionDetails>
             )}
@@ -399,7 +450,16 @@ export const CodeExamples = () => {
             {expanded && (
               <AccordionDetails>
                 <SyntaxHighlighter language='csharp' style={materialDark}>
-                  {ccode}
+                  {ccode(
+                    formValues.email,
+                    formValues.password,
+                    formValues.eNCF,
+                    formValues.rncEmisor,
+                    formValues.razonSocialEmisor,
+                    formValues.direccionEmisor,
+                    formValues.fechaEmision,
+                    formValues.apiKey
+                  )}
                 </SyntaxHighlighter>
               </AccordionDetails>
             )}
@@ -419,7 +479,16 @@ export const CodeExamples = () => {
             {expanded && (
               <AccordionDetails>
                 <SyntaxHighlighter language='bash' style={materialDark}>
-                  {bash(email, password, eNCF, rncEmisor, razonSocialEmisor, direccionEmisor, fechaEmision, apiKey)}
+                  {bash(
+                    formValues.email,
+                    formValues.password,
+                    formValues.eNCF,
+                    formValues.rncEmisor,
+                    formValues.razonSocialEmisor,
+                    formValues.direccionEmisor,
+                    formValues.fechaEmision,
+                    formValues.apiKey
+                  )}
                 </SyntaxHighlighter>
               </AccordionDetails>
             )}

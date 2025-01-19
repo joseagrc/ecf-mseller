@@ -1,9 +1,12 @@
 // MUI Imports
+import dynamic from 'next/dynamic'
+
 import Grid from '@mui/material/Grid'
 
 import { Typography } from '@mui/material'
 
-import Stepper from '@/views/pages/home/Stepper'
+
+const Stepper = dynamic(() => import('@/views/pages/home/Stepper'), { ssr: false })
 
 const eCommerceProductsAdd = () => {
   return (
