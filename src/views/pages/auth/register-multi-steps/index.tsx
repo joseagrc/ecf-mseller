@@ -130,7 +130,9 @@ const RegisterMultiSteps = () => {
         })
 
         if (!response.ok) {
-          throw new Error('Network response was not ok')
+          const result = await response.json()
+
+          throw new Error(result?.message)
         }
         const result = await response.json()
 
@@ -139,9 +141,9 @@ const RegisterMultiSteps = () => {
 
         console.log('User added successfully:', result)
         toast.success('Cuenta creada exitosamente')
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error adding user:', error)
-        toast.error('Error creando cuenta')
+        toast.error(error.message || 'Error creando cuenta')
       }
     } else {
       handleNext()
