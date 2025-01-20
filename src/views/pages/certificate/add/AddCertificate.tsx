@@ -103,16 +103,11 @@ const AddCertificate = (props: AddCertificateProps) => {
       const formattedDate = expirationDate ? new Date(expirationDate).toISOString().split('T')[0] : null
 
       await axiosClient.post('/api/certificate', {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: {
-          certificatePassword: password,
-          expirationDate: formattedDate,
-          certificate: {
-            content: base64,
-            filename: files[0].name
-          }
+        certificatePassword: password,
+        expirationDate: formattedDate,
+        certificate: {
+          content: base64,
+          filename: files[0].name
         }
       })
 
