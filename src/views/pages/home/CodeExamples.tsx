@@ -339,11 +339,6 @@ export const CodeExamples = () => {
             <code>
               host/{`{entorno}`}/documentos-ecf?ecf={'{No. comprobante electrónico}'}
             </code>
-            <Typography variant='h6' sx={{ pt: 2 }}>
-              {' '}
-              Producción{' '}
-            </Typography>
-            <code>https://ecf.api.mseller.app/eCF</code>
           </Box>
         </Grid>
       </Grid>
