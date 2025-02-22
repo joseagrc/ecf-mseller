@@ -12,6 +12,7 @@ export interface DocumentItem {
   signedXml: string
   customerId: string
   qr_url: string
+  summarySignedXml?: string
 }
 
 export interface Metadata {

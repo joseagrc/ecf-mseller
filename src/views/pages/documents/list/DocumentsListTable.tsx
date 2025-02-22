@@ -215,6 +215,13 @@ const DocumentListTable = () => {
               {downloadingIds.includes(row.id) ? <CircularProgress size={20} /> : <i className='mdi-file-xml-box' />}
             </IconButton>
           </Tooltip>
+          {row.original.summarySignedXml && (
+            <Tooltip title='Descargar Resumen XML'>
+              <IconButton onClick={() => handleDownload(row.id, row.original.summarySignedXml!)}>
+                {downloadingIds.includes(row.id) ? <CircularProgress size={20} /> : <i className='mdi-file-xml-box' />}
+              </IconButton>
+            </Tooltip>
+          )}
           <Tooltip title='Ver Respuesta DGII'>
             <IconButton onClick={() => handleOpenDialog(row.original.dgiiResponse)}>
               <i className='ri-eye-line text-textSecondary' />
