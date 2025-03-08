@@ -13,6 +13,9 @@ export interface DocumentItem {
   customerId: string
   qr_url: string
   summarySignedXml?: string
+  commercialApprovalStatus?: string
+  commercialApprovalUrl?: string
+  commercialApprovalReceivedAt?: string
 }
 
 export interface Metadata {

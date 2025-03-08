@@ -46,7 +46,8 @@ import {
   TableHead,
   TableRow,
   Tooltip,
-  Typography
+  Typography,
+  useTheme
 } from '@mui/material'
 
 import type { DocumentItem, DocumentsFilterValues, DocumentsParams } from '@/types/DocumentTypes'
@@ -92,6 +93,8 @@ export const statusChipColor: { [key: string]: StatusChipColorType } = {
 const fuzzyFilter: FilterFn<any> = (): any => {}
 
 const DocumentListTable = () => {
+  const theme = useTheme()
+
   // States
   // Add loading state
   const [downloadingIds, setDownloadingIds] = useState<string[]>([])
@@ -215,6 +218,24 @@ const DocumentListTable = () => {
               {downloadingIds.includes(row.id) ? <CircularProgress size={20} /> : <i className='mdi-file-xml-box' />}
             </IconButton>
           </Tooltip>
+          {row.original.commercialApprovalUrl && (
+            <Tooltip title={`Aprobación Comercial | Estado: ${row.original.commercialApprovalStatus}`}>
+              <IconButton onClick={() => handleDownload(row.id, row.original.commercialApprovalUrl!)}>
+                {downloadingIds.includes(row.id) ? (
+                  <CircularProgress size={20} />
+                ) : (
+                  <i
+                    style={{
+                      color: !row.original.commercialApprovalStatus?.includes('Aceptado')
+                        ? theme.palette.error.main
+                        : theme.palette.success.main
+                    }}
+                    className={`${row.original.commercialApprovalStatus?.includes('Aceptado') ? 'mdi-bank-check' : 'mdi-bank-remove'}`}
+                  />
+                )}
+              </IconButton>
+            </Tooltip>
+          )}
           {row.original.summarySignedXml && (
             <Tooltip title='Descargar Resumen XML'>
               <IconButton onClick={() => handleDownload(row.id, row.original.summarySignedXml!)}>
