@@ -208,7 +208,7 @@ const DocumentListTable = () => {
           </Tooltip> */}
           <Tooltip title='Verificación e-NCF'>
             <span>
-              <IconButton onClick={() => window.open(row.original.qr_url, '_blank')} disabled={!row.original.qr_url}>
+              <IconButton href={row.original.qr_url} target='_blank' disabled={!row.original.qr_url}>
                 <i className='ri-receipt-line' />
               </IconButton>
             </span>
