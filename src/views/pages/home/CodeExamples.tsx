@@ -339,6 +339,10 @@ export const CodeExamples = () => {
             <code>
               host/{`{entorno}`}/documentos-ecf?ecf={'{No. comprobante electrónico}'}
             </code>
+            <Typography variant='h6' sx={{ pt: 2 }}>
+              Autenticación | POST
+            </Typography>
+            <code>/host/{`{entorno}`}/customer/authentication</code>
           </Box>
         </Grid>
       </Grid>
@@ -432,6 +436,11 @@ export const CodeExamples = () => {
               expandIcon={<i className='ri-arrow-up-s-line' />}
               aria-controls='code-content'
               id='code-header'
+              sx={{
+                bgcolor: theme => theme.palette.primary.main,
+                color: theme => theme.palette.primary.contrastText,
+                borderRadius: '6px'
+              }}
             >
               <Typography>Ver código de ejemplo</Typography>
             </AccordionSummary>
@@ -461,6 +470,11 @@ export const CodeExamples = () => {
               expandIcon={<i className='ri-arrow-up-s-line' />}
               aria-controls='code-content'
               id='code-header'
+              sx={{
+                bgcolor: theme => theme.palette.primary.main,
+                color: theme => theme.palette.primary.contrastText,
+                borderRadius: '6px'
+              }}
             >
               <Typography>Ver código de ejemplo</Typography>
             </AccordionSummary>
@@ -490,6 +504,11 @@ export const CodeExamples = () => {
               expandIcon={<i className='ri-arrow-up-s-line' />}
               aria-controls='code-content'
               id='code-header'
+              sx={{
+                bgcolor: theme => theme.palette.primary.main,
+                color: theme => theme.palette.primary.contrastText,
+                borderRadius: '6px'
+              }}
             >
               <Typography>Ver código de ejemplo</Typography>
             </AccordionSummary>

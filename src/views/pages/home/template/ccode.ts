@@ -19,7 +19,8 @@ public class ApiClient
 
     public static async Task MakeApiRequest()
     {
-        var host = "https://ecf.api.mseller.app";
+        var environment = "TesteCF"; // Cambiar a "TesteCF" o "CerteCF" ó "eCF"
+        var host = $"https://ecf.api.mseller.app/{environment}";
         var loginUrl = $"{host}/customer/authentication";
         var apiUrl = $"{host}/documentos-ecf";
 

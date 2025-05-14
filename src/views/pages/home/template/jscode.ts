@@ -9,7 +9,8 @@ export const jscode = (
   apiKey: string
 ) => `
 const makeApiRequest = async () => {
-  const host = 'https://ecf.api.mseller.app';
+  var environment = "TesteCF"; // Cambiar a "TesteCF" o "CerteCF" ó "eCF"
+  const host = \`https://ecf.api.mseller.app/\${environment}\`;
   const loginUrl = \`\${host}/customer/authentication\`;
   const apiUrl = \`\${host}/documentos-ecf\`;
 
