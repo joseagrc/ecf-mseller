@@ -91,42 +91,48 @@ public class ApiClient
                     },
                     DetallesItems = new
                     {
-                        Item = new
+                        Item = new[]
                         {
-                            NumeroLinea = "1",
-                            IndicadorFacturacion = "1",
-                            NombreItem = "Producto 1",
-                            IndicadorBienoServicio = "1",
-                            CantidadItem = 24,
-                            UnidadMedida = "43",
-                            PrecioUnitarioItem = 25.0,
-                            DescuentoMonto = 60.0,
-                            TablaSubDescuento = new
+                            new
                             {
-                                SubDescuento = new
+                                NumeroLinea = "1",
+                                IndicadorFacturacion = "1",
+                                NombreItem = "Producto 1",
+                                IndicadorBienoServicio = "1",
+                                CantidadItem = 24,
+                                UnidadMedida = "43",
+                                PrecioUnitarioItem = 25.0,
+                                DescuentoMonto = 60.0,
+                                TablaSubDescuento = new
                                 {
-                                    TipoSubDescuento = "%",
-                                    SubDescuentoPorcentaje = 10.0,
-                                    MontoSubDescuento = 60.0
-                                }
-                            },
-                            MontoItem = 540.0
+                                    SubDescuento = new
+                                    {
+                                        TipoSubDescuento = "%",
+                                        SubDescuentoPorcentaje = 10.0,
+                                        MontoSubDescuento = 60.0
+                                    }
+                                },
+                                MontoItem = 540.0
+                            }
                         }
                     },
                     Paginacion = new
                     {
-                        Pagina = new
+                        Pagina = new[]
                         {
-                            PaginaNo = 1,
-                            NoLineaDesde = 1,
-                            NoLineaHasta = 1,
-                            SubtotalMontoGravadoPagina = 540.0,
-                            SubtotalMontoGravado1Pagina = 540.0,
-                            SubtotalExentoPagina = 0,
-                            SubtotalItbisPagina = 97.20,
-                            SubtotalItbis1Pagina = 97.20,
-                            MontoSubtotalPagina = 637.2,
-                            SubtotalMontoNoFacturablePagina = 0
+                            new
+                            {
+                                PaginaNo = 1,
+                                NoLineaDesde = 1,
+                                NoLineaHasta = 1,
+                                SubtotalMontoGravadoPagina = 540.0,
+                                SubtotalMontoGravado1Pagina = 540.0,
+                                SubtotalExentoPagina = 0,
+                                SubtotalItbisPagina = 97.20,
+                                SubtotalItbis1Pagina = 97.20,
+                                MontoSubtotalPagina = 637.2,
+                                SubtotalMontoNoFacturablePagina = 0
+                            }
                         }
                     },
                     FechaHoraFirma = "15-07-2023 05:07:00"

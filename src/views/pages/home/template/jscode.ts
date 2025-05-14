@@ -79,7 +79,7 @@ const makeApiRequest = async () => {
             }
           },
           "DetallesItems": {
-            "Item": {
+            "Item": [{
               "NumeroLinea": "1",
               "IndicadorFacturacion": "1",
               "NombreItem": "Producto 1",
@@ -96,10 +96,10 @@ const makeApiRequest = async () => {
                 }
               },
               "MontoItem": 540.0
-            }
+            }]
           },
           "Paginacion": {
-            "Pagina": {
+            "Pagina": [{
               "PaginaNo": 1,
               "NoLineaDesde": 1,
               "NoLineaHasta": 1,
@@ -110,7 +110,7 @@ const makeApiRequest = async () => {
               "SubtotalItbis1Pagina": 97.20,
               "MontoSubtotalPagina": 637.2,
               "SubtotalMontoNoFacturablePagina": 0
-            }
+         }]
           },
           "FechaHoraFirma": ""
         }
