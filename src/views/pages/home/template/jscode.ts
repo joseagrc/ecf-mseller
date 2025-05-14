@@ -89,11 +89,11 @@ const makeApiRequest = async () => {
               "PrecioUnitarioItem": 25.0,
               "DescuentoMonto": 60.0,
               "TablaSubDescuento": {
-                "SubDescuento": {
+                "SubDescuento": [{
                   "TipoSubDescuento": "%",
                   "SubDescuentoPorcentaje": 10.0,
                   "MontoSubDescuento": 60.0
-                }
+      }]
               },
               "MontoItem": 540.0
             }]

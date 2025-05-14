@@ -105,11 +105,14 @@ public class ApiClient
                                 DescuentoMonto = 60.0,
                                 TablaSubDescuento = new
                                 {
-                                    SubDescuento = new
+                                    SubDescuento = new[]
                                     {
-                                        TipoSubDescuento = "%",
-                                        SubDescuentoPorcentaje = 10.0,
-                                        MontoSubDescuento = 60.0
+                                        new
+                                        {
+                                            TipoSubDescuento = "%",
+                                            SubDescuentoPorcentaje = 10.0,
+                                            MontoSubDescuento = 60.0
+                                        }
                                     }
                                 },
                                 MontoItem = 540.0
