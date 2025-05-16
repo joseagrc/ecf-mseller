@@ -61,7 +61,7 @@ import type { ThemeColor } from '@core/types'
 // Style Imports
 import LoadingWrapper from '@/components/LoadingWrapper'
 import type { AppDispatch, RootState } from '@/redux-store'
-import { getDocuments } from '@/redux-store/slices/documentSlice'
+import { getDocuments, retryDocument } from '@/redux-store/slices/documentSlice'
 import tableStyles from '@core/styles/table.module.css'
 import AddApiKeyDrawer from './AddApiKeyDrawer'
 import TableFilters, { parameters } from './TableFilters'
@@ -125,6 +125,19 @@ const DocumentListTable = () => {
   useEffect(() => {
     init()
   }, [init])
+
+  const handleRetry = useCallback(
+    async (ecf: string) => {
+      try {
+        const response = await dispatch(retryDocument({ ecf, params })).unwrap()
+
+        nextTokens.current.set(1, response.nextToken)
+      } catch (error) {
+        console.error('Error re-sending document:', error)
+      }
+    },
+    [params, dispatch]
+  )
 
   const handleOpenDialog = (responses: string[]) => {
     setDgiiResponses(responses)
@@ -201,11 +214,15 @@ const DocumentListTable = () => {
       header: 'Acción',
       cell: ({ row }) => (
         <div className='flex items-center'>
-          {/* <Tooltip title='Re-enviar documento | Se implementará en la próxima versión'>
-            <IconButton onClick={() => {}}>
+          <Tooltip title='Re-enviar documento'>
+            <IconButton
+              onClick={() => handleRetry(row.original.ncf)}
+
+              // disabled={!row.original.status.toLowerCase().includes('error')}
+            >
               <i className='ri-mail-send-fill' />
             </IconButton>
-          </Tooltip> */}
+          </Tooltip>
           <Tooltip title='Verificación e-NCF'>
             <span>
               <IconButton href={row.original.qr_url} target='_blank' disabled={!row.original.qr_url}>
