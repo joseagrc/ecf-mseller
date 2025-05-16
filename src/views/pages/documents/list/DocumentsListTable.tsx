@@ -217,8 +217,7 @@ const DocumentListTable = () => {
           <Tooltip title='Re-enviar documento'>
             <IconButton
               onClick={() => handleRetry(row.original.ncf)}
-
-              // disabled={!row.original.status.toLowerCase().includes('error')}
+              disabled={!row.original.status.toLowerCase().includes('error')}
             >
               <i className='ri-mail-send-fill' />
             </IconButton>
