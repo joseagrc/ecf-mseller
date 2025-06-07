@@ -1,27 +1,20 @@
 import { NextResponse } from 'next/server'
 
-import { CognitoIdentityProviderClient, ConfirmSignUpCommand } from '@aws-sdk/client-cognito-identity-provider'
-
-import { calculateSecretHash } from '@/utils/calculateSecretHash'
+import { getVerificationToken, removeVerificationToken } from '@/libs/token-store'
 
 export async function POST(req: Request) {
   try {
     const { email, code } = await req.json()
 
-    const client = new CognitoIdentityProviderClient({
-      region: process.env.AWS_REGION
-    })
+    const stored = getVerificationToken(email)
 
-    const secretHash = calculateSecretHash(email)
+    if (stored !== code) {
+      return NextResponse.json({ error: 'Invalid code' }, { status: 400 })
+    }
 
-    await client.send(
-      new ConfirmSignUpCommand({
-        ClientId: process.env.COGNITO_CLIENT_ID!,
-        Username: email,
-        ConfirmationCode: code,
-        SecretHash: secretHash
-      })
-    )
+    removeVerificationToken(email)
+
+    // Mark user as verified in your user store here
 
     return NextResponse.json({ success: true })
   } catch (error: any) {

@@ -1,22 +1,23 @@
+import crypto from 'crypto'
+
 import { NextResponse } from 'next/server'
 
-import { CognitoIdentityProviderClient, ResendConfirmationCodeCommand } from '@aws-sdk/client-cognito-identity-provider'
-
-import { calculateSecretHash } from '@/utils/calculateSecretHash'
+import { sendMail } from '@/libs/email'
+import { setVerificationToken } from '@/libs/token-store'
 
 export async function POST(request: Request) {
   try {
-    const client = new CognitoIdentityProviderClient({ region: process.env.AWS_REGION })
-
     const { email } = await request.json()
-    const secretHash = calculateSecretHash(email)
-    const command = new ResendConfirmationCodeCommand({
-      ClientId: process.env.COGNITO_CLIENT_ID!,
-      Username: email,
-      SecretHash: secretHash
-    })
 
-    await client.send(command)
+    const code = crypto.randomInt(100000, 999999).toString()
+
+    setVerificationToken(email, code)
+
+    await sendMail({
+      to: email,
+      subject: 'Verification code',
+      text: `Your verification code is ${code}`
+    })
 
     return NextResponse.json({ message: 'Verification code resent successfully' })
   } catch (error: any) {
