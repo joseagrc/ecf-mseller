@@ -1,25 +1,20 @@
 import { NextResponse } from 'next/server'
 
-import { CognitoIdentityProviderClient, ConfirmForgotPasswordCommand } from '@aws-sdk/client-cognito-identity-provider'
-
-import { calculateSecretHash } from '@/utils/calculateSecretHash'
+import { getPasswordResetToken, removePasswordResetToken } from '@/libs/token-store'
 
 export async function POST(req: Request) {
   try {
-    const { email, code, newPassword } = await req.json()
+    const { email, code } = await req.json()
 
-    const client = new CognitoIdentityProviderClient({ region: process.env.AWS_REGION })
+    const stored = getPasswordResetToken(email)
 
-    const secretHash = calculateSecretHash(email)
-    const command = new ConfirmForgotPasswordCommand({
-      ClientId: process.env.COGNITO_CLIENT_ID,
-      Username: email,
-      ConfirmationCode: code,
-      Password: newPassword,
-      SecretHash: secretHash
-    })
+    if (stored !== code) {
+      return NextResponse.json({ error: 'Invalid code' }, { status: 400 })
+    }
 
-    await client.send(command)
+    removePasswordResetToken(email)
+
+    // Here you should update the user password in your user store
 
     return NextResponse.json({ success: true })
   } catch (error: any) {
