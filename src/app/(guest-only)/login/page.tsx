@@ -12,9 +12,9 @@ export const metadata: Metadata = {
   description: 'Login to your account | Tu plataforma de Facturación Electrónica  DGII República Dominicana'
 }
 
-const LoginPage = () => {
+const LoginPage = async () => {
   // Vars
-  const mode = getServerMode()
+  const mode = await getServerMode()
 
   return <Login mode={mode} />
 }

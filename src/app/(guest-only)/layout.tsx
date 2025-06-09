@@ -7,8 +7,8 @@ import GuestOnlyRoute from '@/hocs/GuestOnlyRoute'
 import Providers from '@/components/Providers'
 import BlankLayout from '@/@layouts/BlankLayout'
 
-const Layout = ({ children }: ChildrenType) => {
-  const systemMode = getSystemMode()
+const Layout = async ({ children }: ChildrenType) => {
+  const systemMode = await getSystemMode()
 
   return (
     <Providers direction={'ltr'}>
