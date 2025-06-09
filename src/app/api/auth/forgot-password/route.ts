@@ -1,24 +1,23 @@
+import crypto from 'crypto'
+
 import { NextResponse } from 'next/server'
 
-import { CognitoIdentityProviderClient, ForgotPasswordCommand } from '@aws-sdk/client-cognito-identity-provider'
-
-import { calculateSecretHash } from '@/utils/calculateSecretHash'
+import { sendMail } from '@/libs/email'
+import { setPasswordResetToken } from '@/libs/token-store'
 
 export async function POST(req: Request) {
   try {
     const { email } = await req.json()
 
-    const client = new CognitoIdentityProviderClient({ region: process.env.AWS_REGION })
+    const code = crypto.randomInt(100000, 999999).toString()
 
-    const secretHash = calculateSecretHash(email)
+    setPasswordResetToken(email, code)
 
-    const command = new ForgotPasswordCommand({
-      ClientId: process.env.COGNITO_CLIENT_ID,
-      Username: email,
-      SecretHash: secretHash
+    await sendMail({
+      to: email,
+      subject: 'Password recovery',
+      text: `Your verification code is ${code}`
     })
-
-    await client.send(command)
 
     return NextResponse.json({ success: true })
   } catch (error: any) {

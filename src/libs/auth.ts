@@ -1,15 +1,22 @@
-import {
-  AuthFlowType,
-  CognitoIdentityProviderClient,
-  GetUserCommand,
-  InitiateAuthCommand
-} from '@aws-sdk/client-cognito-identity-provider'
-import { jwtDecode } from 'jwt-decode' // Import jwt-decode library
 import type { NextAuthOptions, Profile as NextAuthProfile } from 'next-auth'
-import CognitoProvider from 'next-auth/providers/cognito'
 import CredentialProvider from 'next-auth/providers/credentials'
 
-import { calculateSecretHash } from '@/utils/calculateSecretHash'
+// Authentication can be implemented against any service. The helper below
+// performs a POST request to `AUTH_API_URL` which should validate the
+// credentials and return user tokens.
+const authenticateUser = async (email: string, password: string) => {
+  const response = await fetch(`${process.env.AUTH_API_URL}/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  })
+
+  if (!response.ok) {
+    throw new Error('Authentication failed')
+  }
+
+  return response.json()
+}
 
 export interface UserProfile {
   givenName: string
@@ -29,29 +36,6 @@ declare module 'next-auth' {
   }
 }
 
-export interface CognitoJwtPayload {
-  sub: string
-  'cognito:groups'?: string[]
-  iss: string
-  'cognito:username': string
-  'custom:secretId'?: string
-  origin_jti: string
-  aud: string
-  'custom:rnc'?: string
-  'custom:plan'?: string
-  'custom:businessName'?: string
-  event_id: string
-  token_use: string
-  auth_time: number
-  exp: number
-  iat: number
-  jti: string
-  email: string
-  email_verified?: boolean
-  given_name?: string
-  family_name?: string
-  name?: string
-}
 
 export interface Profile extends NextAuthProfile {
   'custom:rnc'?: string
@@ -59,63 +43,10 @@ export interface Profile extends NextAuthProfile {
   'custom:plan'?: string
 }
 
-const authenticateUser = async (email: string, password: string) => {
-  const client = new CognitoIdentityProviderClient({
-    region: process.env.AWS_REGION
-  })
-
-  const params = {
-    AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
-    ClientId: process.env.COGNITO_CLIENT_ID,
-    AuthParameters: {
-      USERNAME: email,
-      PASSWORD: password,
-      SECRET_HASH: calculateSecretHash(email)
-    }
-  }
-
-  try {
-    const command = new InitiateAuthCommand(params)
-    const response = await client.send(command)
-
-    return {
-      accessToken: response.AuthenticationResult?.AccessToken,
-      idToken: response.AuthenticationResult?.IdToken,
-      refreshToken: response.AuthenticationResult?.RefreshToken
-    }
-  } catch (error) {
-    throw new Error('Authentication failed')
-  }
-}
-
-export const getUserAttributes = async (accessToken: string): Promise<Record<string, string>> => {
-  const client = new CognitoIdentityProviderClient({
-    region: process.env.AWS_REGION
-  })
-
-  const command = new GetUserCommand({
-    AccessToken: accessToken
-  })
-
-  try {
-    const response = await client.send(command)
-
-    return (
-      response.UserAttributes?.reduce(
-        (acc, attr) => {
-          if (attr.Name && attr.Value) {
-            acc[attr.Name] = attr.Value
-          }
-
-          return acc
-        },
-        {} as Record<string, string>
-      ) || {}
-    )
-  } catch (error) {
-    console.error('Error getting user attributes:', error)
-    throw error
-  }
+// Placeholder helper when no external user store is available. Adjust this
+// function to integrate with your own user management system.
+export const getUserAttributes = async (): Promise<Record<string, string>> => {
+  return {}
 }
 
 export const authOptions: NextAuthOptions = {
@@ -152,17 +83,6 @@ export const authOptions: NextAuthOptions = {
           return getUserFromToken(authResult, email)
         } catch (error) {
           throw new Error('Invalid credentials')
-        }
-      }
-    }),
-    CognitoProvider({
-      clientId: process.env.COGNITO_CLIENT_ID!,
-      clientSecret: process.env.COGNITO_CLIENT_SECRET!,
-      issuer: process.env.COGNITO_ISSUER,
-      authorization: {
-        params: {
-          scope: 'openid email profile',
-          response_type: 'code'
         }
       }
     })
@@ -258,62 +178,11 @@ return session
 }
 
 export async function refreshAccessToken(token: any) {
-  try {
-    const client = new CognitoIdentityProviderClient({
-      region: process.env.AWS_REGION
-    })
-    const decodedInfo = getUserFromToken(token, token.email || '')
-    const hash = calculateSecretHash(decodedInfo.userProfile.username || '')
-
-    const params = {
-      AuthFlow: AuthFlowType.REFRESH_TOKEN_AUTH,
-      ClientId: process.env.COGNITO_CLIENT_ID,
-      AuthParameters: {
-        REFRESH_TOKEN: token.refreshToken,
-        SECRET_HASH: hash
-      }
-    }
-
-    const command = new InitiateAuthCommand(params)
-    const response = await client.send(command)
-
-    const refreshedTokens = await response.AuthenticationResult
-
-    if (response?.['$metadata'].httpStatusCode === 401) {
-      console.error('BadRequest or Unauthorized error:', refreshedTokens)
-
-      return {
-        ...token,
-        error: 'RefreshAccessTokenError',
-        accessToken: null,
-        accessTokenExpires: 0,
-        idToken: null,
-        refreshToken: null,
-        userProfile: null
-      }
-    }
-
-    if (response?.['$metadata']?.httpStatusCode !== 200) {
-      throw refreshedTokens
-    }
-
-    return {
-      ...token,
-      accessToken: refreshedTokens?.AccessToken,
-      accessTokenExpires: Date.now() + (refreshedTokens?.ExpiresIn || 1) * 1000,
-      idToken: refreshedTokens?.IdToken ?? token.idToken,
-      refreshToken: token.refreshToken,
-      userProfile: token.userProfile // ** Retain userProfile information
-    }
-  } catch (error) {
-    console.error('Error refreshing access token', error)
-
-    return {
-      ...token,
-      error: 'RefreshAccessTokenError',
-
-      errorMessage: error || 'The server did not understand the operation that was requested.'
-    }
+  // In a custom authentication system you should refresh the session here.
+  // This stub simply extends the expiry time.
+  return {
+    ...token,
+    accessTokenExpires: Date.now() + 60 * 60 * 1000
   }
 }
 
@@ -338,25 +207,25 @@ interface AuthUser {
 }
 
 const getUserFromToken = (authResult: any, email?: string): AuthUser => {
-  const decodedToken = jwtDecode(authResult.idToken) as CognitoJwtPayload
+  const decodedToken: any = authResult
 
   return {
     id: email || '',
     email: email,
-    expires: decodedToken.exp,
-    name: decodedToken?.given_name + ' ' + decodedToken?.family_name || email,
+    expires: decodedToken.expires || Math.floor(Date.now() / 1000) + 60 * 60,
+    name: decodedToken?.givenName ? `${decodedToken.givenName} ${decodedToken.familyName}` : email,
     accessToken: authResult.accessToken,
     idToken: authResult.idToken,
     refreshToken: authResult.refreshToken,
     userProfile: {
-      username: decodedToken['cognito:username'],
-      givenName: decodedToken?.given_name,
-      familyName: decodedToken?.family_name,
-      email: decodedToken?.email,
-      rnc: decodedToken['custom:rnc'] || '',
-      businessName: decodedToken['custom:businessName'],
-      plan: decodedToken['custom:plan'],
-      verified: decodedToken.email_verified
+      username: decodedToken.username || email,
+      givenName: decodedToken.givenName,
+      familyName: decodedToken.familyName,
+      email: decodedToken.email || email,
+      rnc: decodedToken.rnc || '',
+      businessName: decodedToken.businessName,
+      plan: decodedToken.plan,
+      verified: decodedToken.verified
     }
   }
 }

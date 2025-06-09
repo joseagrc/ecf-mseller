@@ -14,7 +14,6 @@
     "postinstall": "npm run build:icons"
   },
   "dependencies": {
-    "@aws-sdk/client-cognito-identity-provider": "^3.721.0",
     "@emotion/cache": "11.13.0",
     "@emotion/react": "11.13.0",
     "@emotion/styled": "11.13.0",
@@ -44,7 +43,8 @@
     "react-toastify": "^11.0.2",
     "react-use": "17.5.1",
     "server-only": "0.0.1",
-    "yup": "^1.6.1"
+    "yup": "^1.6.1",
+    "nodemailer": "^6.9.11"
   },
   "devDependencies": {
     "@iconify/json": "^2.2.292",
